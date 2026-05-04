@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}练习详情 - 提示词教学平台{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'practice:history' %}">练习记录</a></li>
+                <li class="breadcrumb-item active">详情</li>
+            </ol>
+        </nav>
+        
+        <h2 class="mb-4">📋 练习详情</h2>
+        
+        <div class="card mb-4">
+            <div class="card-header text-white" style="background-color: rgb(0, 164, 244);">
+                <h5 class="mb-0">基本信息</h5>
+            </div>
+            <div class="card-body">
+                <p><strong>练习时间：</strong>{{ record.created_at|date:"Y-m-d H:i:s" }}</p>
+                <p><strong>场景设置：</strong>{{ record.system_prompt }}</p>
+            </div>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <h5 class="mb-0">你的提示词</h5>
+                    </div>
+                    <div class="card-body">
+                        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; word-wrap: break-word;">{{ record.user_prompt }}</pre>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header text-white" style="background-color: rgb(0, 164, 244);">
+                        <h5 class="mb-0">综合得分：{{ record.overall_score }}</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for dimension, score in record.scores.items %}
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span><strong>{% if dimension == 'clarity' %}清晰度{% elif dimension == 'completeness' %}完整性{% elif dimension == 'structure' %}结构化{% elif dimension == 'creativity' %}创造性{% elif dimension == 'actionability' %}可执行性{% elif dimension == 'context_awareness' %}上下文感知{% else %}{{ dimension|title }}{% endif %}</strong></span>
+                                <span><strong>{{ score }}</strong>/100</span>
+                            </div>
+                            <div class="progress" style="height: 22px; border-radius: 11px; overflow: hidden;">
+                                <div class="progress-bar" 
+                                     role="progressbar" 
+                                     style="width: {{ score }}%; background-color: rgb(0, 164, 244); transition: width 0.8s ease;">
+                                    <span style="color: white; font-weight: 600;">{{ score }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        {% if record.suggestions %}
+        <div class="alert alert-info">
+            <h5>💡 改进建议</h5>
+            <p>{{ record.suggestions }}</p>
+        </div>
+        {% endif %}
+        
+        <div class="d-flex gap-2 mt-4">
+            <a href="{% url 'practice:practice' %}" class="btn btn-lg" style="background-color: rgb(0, 164, 244); color: white; border: none;">继续练习</a>
+            <a href="{% url 'practice:history' %}" class="btn btn-outline-secondary btn-lg">返回列表</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'base.html' %}
+
+{% block title %}首页 - 提示词教学平台{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4">🎯 提示词教学平台</h1>
+            <p class="lead text-muted">掌握AI对话的艺术，提升你的提示词编写能力</p>
+        </div>
+
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab">
+                    🎮 实战练习
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="learning-tab" data-bs-toggle="tab" data-bs-target="#learning" type="button" role="tab">
+                    📚 学习中心
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">
+                    ℹ️ 关于我们
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content mt-4" id="mainTabContent">
+            <div class="tab-pane fade show active" id="practice" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>🎮 实战练习</h3>
+                        <p>输入你的提示词，获得专业的多维度评分和改进建议</p>
+                        {% if user.is_authenticated %}
+                            <a href="{% url 'practice:practice' %}" class="btn btn-primary btn-lg">开始练习</a>
+                        {% else %}
+                            <p class="text-muted">请先<a href="{% url 'users:login' %}">登录</a>或<a href="{% url 'users:register' %}">注册</a>以开始练习</p>
+                        {% endif %}
+                        
+                        <hr>
+                        <h5>功能特点：</h5>
+                        <ul>
+                            <li>✅ 6维度智能评分系统（清晰度、完整性、结构化等）</li>
+                            <li>✅ AI驱动的个性化改进建议</li>
+                            <li>✅ 多场景支持（写作、编程、分析、创意等）</li>
+                            <li>✅ 练习历史记录与进度追踪</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="learning" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>📚 学习中心</h3>
+                        <p>从基础到高级，系统地学习提示词编写技巧</p>
+                        <a href="{% url 'learning:list' %}" class="btn btn-success btn-lg">开始学习</a>
+                        
+                        <hr>
+                        <h5>课程分类：</h5>
+                        <div class="row mt-3">
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5>🌱 基础入门</h5>
+                                        <p class="small">了解提示词的基本概念和原则</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5>⚡ 进阶技巧</h5>
+                                        <p class="small">掌握高级技巧和最佳实践</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5>🚀 高级应用</h5>
+                                        <p class="small">复杂场景下的提示词设计</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <h5>💡 最佳实践</h5>
+                                        <p class="small">行业案例和实战经验分享</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="about" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h3>ℹ️ 关于我们</h3>
+                        <p>提示词教学平台是一个专注于帮助用户提升AI对话技能的在线学习平台。</p>
+                        
+                        <h5 class="mt-4">我们的使命</h5>
+                        <p>让每个人都能掌握与AI高效沟通的技巧，充分发挥人工智能的潜力。</p>
+                        
+                        <h5 class="mt-4">核心功能</h5>
+                        <ul>
+                            <li><strong>智能评估系统</strong>：基于大语言模型的多维度评分</li>
+                            <li><strong>个性化反馈</strong>：针对每个提示词提供具体改进建议</li>
+                            <li><strong>系统化学习</strong>：从入门到精通的完整课程体系</li>
+                            <li><strong>实践驱动</strong>：通过大量练习巩固所学知识</li>
+                        </ul>
+                        
+                        <h5 class="mt-4">技术栈</h5>
+                        <p>Django + PostgreSQL + 大语言模型 API</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,592 @@
+{% extends 'base.html' %}
+{% load learning_extras %}
+
+{% block title %}{{ material.title }} - 提示词教学平台{% endblock %}
+
+{% block extra_css %}
+<style>
+/* 学习详情页专用样式 */
+.learning-container {
+    display: flex;
+    gap: 2rem;
+    margin-top: 1rem;
+}
+
+/* 左侧目录样式 */
+.sidebar-toc {
+    width: 280px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 2rem;
+    height: calc(100vh - 4rem);
+    overflow-y: auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 164, 244, 0.1);
+    border: 1px solid rgba(0, 164, 244, 0.15);
+}
+
+.toc-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 2px solid rgba(0, 164, 244, 0.15);
+    background: linear-gradient(135deg, rgba(0, 164, 244, 0.05) 0%, rgba(0, 164, 244, 0.02) 100%);
+}
+
+.toc-header h6 {
+    margin: 0;
+    color: rgb(0, 164, 244);
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toc-content {
+    padding: 1rem 0;
+    max-height: calc(100vh - 10rem);
+    overflow-y: auto;
+}
+
+.toc-item {
+    display: block;
+    padding: 0.5rem 1.5rem;
+    color: #555;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-left: 3px solid transparent;
+    line-height: 1.5;
+}
+
+.toc-item:hover {
+    color: rgb(0, 164, 244);
+    background-color: rgba(0, 164, 244, 0.05);
+    border-left-color: rgb(0, 164, 244);
+}
+
+.toc-item.level-2 {
+    padding-left: 2rem;
+    font-size: 0.85rem;
+}
+
+.toc-item.level-3 {
+    padding-left: 2.8rem;
+    font-size: 0.82rem;
+    color: #777;
+}
+
+/* 主内容区域 */
+.main-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.article-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 164, 244, 0.08);
+    border-top: 4px solid rgb(0, 164, 244);
+    overflow: hidden;
+}
+
+.article-header {
+    padding: 2.5rem 3rem 2rem;
+    border-bottom: 1px solid #e9ecef;
+    background: linear-gradient(to bottom, rgba(0, 164, 244, 0.03) 0%, transparent 100%);
+}
+
+.badge-category {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1.25rem;
+    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    color: white;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    box-shadow: 0 2px 8px rgba(0, 164, 244, 0.3);
+}
+
+.article-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 1.25rem 0 1rem;
+    line-height: 1.3;
+}
+
+.article-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    color: #6c757d;
+    font-size: 0.92rem;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.article-body {
+    padding: 3rem;
+    line-height: 1.85;
+    font-size: 1.05rem;
+    color: #333;
+}
+
+/* Markdown内容渲染样式 */
+.article-body h2 {
+    color: rgb(0, 164, 244);
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 3px solid rgba(0, 164, 244, 0.15);
+    scroll-margin-top: 2rem;
+}
+
+.article-body h3 {
+    color: #2c3e50;
+    font-size: 1.45rem;
+    font-weight: 600;
+    margin: 2.5rem 0 1rem;
+    scroll-margin-top: 2rem;
+}
+
+.article-body h4 {
+    color: #34495e;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 2rem 0 0.875rem;
+}
+
+.article-body p {
+    margin-bottom: 1.35rem;
+    text-align: justify;
+}
+
+.article-body ul,
+.article-body ol {
+    margin: 1.5rem 0;
+    padding-left: 2.5rem;
+}
+
+.article-body li {
+    margin-bottom: 0.75rem;
+    line-height: 1.7;
+}
+
+.article-body li::marker {
+    color: rgb(0, 164, 244);
+}
+
+.article-body strong {
+    color: #2c3e50;
+    font-weight: 700;
+}
+
+.article-body em {
+    color: #555;
+    font-style: italic;
+}
+
+.article-body code {
+    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    color: #d63384;
+    padding: 0.25rem 0.6rem;
+    border-radius: 6px;
+    font-family: 'Consolas', 'Monaco', monospace;
+    font-size: 0.88em;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.article-body pre {
+    background: linear-gradient(135deg, #282c34 0%, #21252b 100%);
+    color: #abb2bf;
+    padding: 1.75rem;
+    border-radius: 10px;
+    overflow-x: auto;
+    margin: 2rem 0;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    border: 1px solid #3e4451;
+    position: relative;
+}
+
+.article-body pre::before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0.75rem;
+    right: 1rem;
+    font-size: 0.78rem;
+    color: #5c6370;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.article-body pre code {
+    background: transparent;
+    color: inherit;
+    padding: 0;
+    border: none;
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+.article-body blockquote {
+    border-left: 5px solid rgb(0, 164, 244);
+    padding: 1.25rem 1.75rem;
+    margin: 2rem 0;
+    background: linear-gradient(to right, rgba(0, 164, 244, 0.04) 0%, transparent 100%);
+    border-radius: 0 8px 8px 0;
+    color: #495057;
+    font-style: italic;
+    font-size: 1.02rem;
+}
+
+.article-body table {
+    width: 100%;
+    margin: 2rem 0;
+    border-collapse: separate;
+    border-spacing: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.article-body thead {
+    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    color: white;
+}
+
+.article-body th {
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    text-align: left;
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+}
+
+.article-body td {
+    padding: 0.95rem 1.25rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+.article-body tbody tr:hover {
+    background-color: rgba(0, 164, 244, 0.03);
+}
+
+.article-body hr {
+    border: none;
+    height: 2px;
+    background: linear-gradient(to right, transparent 0%, rgb(0, 164, 244) 50%, transparent 100%);
+    margin: 3rem 0;
+    opacity: 0.3;
+}
+
+.article-footer {
+    padding: 2rem 3rem;
+    border-top: 2px solid #e9ecef;
+    background: #f8f9fa;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.btn-primary-custom {
+    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 164, 244, 0.3);
+}
+
+.btn-primary-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 164, 244, 0.4);
+    color: white;
+}
+
+.btn-outline-custom {
+    background: white;
+    color: rgb(0, 164, 244);
+    border: 2px solid rgb(0, 164, 244);
+    padding: 0.7rem 1.75rem;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.btn-outline-custom:hover {
+    background: rgb(0, 164, 244);
+    color: white;
+    transform: translateY(-2px);
+}
+
+/* 章节导航卡片 */
+.chapter-nav {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.nav-card {
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.nav-card.prev {
+    background: linear-gradient(135deg, rgba(0, 164, 244, 0.05) 0%, rgba(0, 164, 244, 0.02) 100%);
+    border-left: 4px solid rgb(0, 164, 244);
+}
+
+.nav-card.next {
+    background: linear-gradient(135deg, rgba(0, 164, 244, 0.05) 0%, rgba(0, 164, 244, 0.02) 100%);
+    border-right: 4px solid rgb(0, 164, 244);
+    text-align: right;
+}
+
+.nav-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 164, 244, 0.15);
+}
+
+.nav-label {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.nav-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgb(0, 164, 244);
+}
+
+/* 响应式设计 */
+@media (max-width: 992px) {
+    .learning-container {
+        flex-direction: column;
+    }
+    
+    .sidebar-toc {
+        width: 100%;
+        position: static;
+        height: auto;
+        max-height: 400px;
+        order: -1; /* 移动端目录显示在顶部 */
+    }
+    
+    .article-header,
+    .article-body,
+    .article-footer {
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+    }
+    
+    .article-title {
+        font-size: 1.75rem;
+    }
+    
+    .chapter-nav {
+        grid-template-columns: 1fr;
+    }
+    
+    .nav-card.next {
+        text-align: left;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <!-- 面包屑导航 -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'learning:list' %}" style="color: rgb(0, 164, 244);">📚 学习中心</a>
+            </li>
+            <li class="breadcrumb-item active">{{ material.title }}</li>
+        </ol>
+    </nav>
+
+    <!-- 主容器：左侧目录 + 右侧内容 -->
+    <div class="learning-container">
+        
+        <!-- 左侧目录导航 -->
+        {% with toc=material.content|extract_toc %}
+        {% if toc %}
+        <aside class="sidebar-toc">
+            <div class="toc-header">
+                <h6>📑 本章目录</h6>
+            </div>
+            <nav class="toc-content">
+                {% for item in toc %}
+                <a href="#{{ item.anchor }}" 
+                   class="toc-item level-{{ item.level }}"
+                   data-scroll="smooth">
+                    {{ item.title }}
+                </a>
+                {% endfor %}
+            </nav>
+        </aside>
+        {% endif %}
+        {% endwith %}
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            
+            <!-- 文章主体 -->
+            <article class="article-card">
+                
+                <!-- 文章头部 -->
+                <header class="article-header">
+                    <span class="badge-category">
+                        {% if material.category == 'basic' %}🌱 基础入门
+                        {% elif material.category == 'intermediate' %}⚡ 进阶技巧
+                        {% elif material.category == 'advanced' %}🚀 高级应用
+                        {% elif material.category == 'best_practices' %}💎 最佳实践
+                        {% else %}{{ material.get_category_display }}{% endif %}
+                    </span>
+                    
+                    <h1 class="article-title">{{ material.title }}</h1>
+                    
+                    <div class="article-meta">
+                        <span class="meta-item">
+                            📅 {{ material.created_at|date:"Y年m月d日 H:i" }}
+                        </span>
+                        <span class="meta-item">
+                            ⏱️ 阅读时间：约 {{ material.reading_time }} 分钟
+                        </span>
+                        <span class="meta-item">
+                            📊 字数：约 {{ material.content|length }} 字
+                        </span>
+                        <span class="meta-item">
+                            📖 第 {{ material.order_index }} 章
+                        </span>
+                    </div>
+                </header>
+
+                <!-- Markdown渲染的内容 -->
+                <div class="article-body">
+                    {{ material.content|markdown_to_html|safe }}
+                </div>
+
+                <!-- 底部操作栏 -->
+                <footer class="article-footer">
+                    <div class="action-buttons">
+                        <a href="{% url 'practice:practice' %}" 
+                           class="btn-primary-custom btn">
+                            🎯 去练习实战
+                        </a>
+                        <a href="{% url 'learning:list' %}" 
+                           class="btn-outline-custom btn">
+                            ← 返回课程列表
+                        </a>
+                    </div>
+                    
+                    <p class="text-muted mt-3 mb-0 small">
+                        💡 <strong>学习建议：</strong>学完本章后，强烈建议到练习模块进行实战演练，巩固所学知识！
+                    </p>
+                </footer>
+            </article>
+
+            <!-- 前后章节导航 -->
+            <div class="chapter-nav">
+                {% if prev_material %}
+                <a href="{% url 'learning:detail' prev_material.id %}" 
+                   class="nav-card prev text-decoration-none">
+                    <span class="nav-label">← 上一章</span>
+                    <div class="nav-title">{{ prev_material.title }}</div>
+                </a>
+                {% endif %}
+                
+                {% if next_material %}
+                <a href="{% url 'learning:detail' next_material.id %}" 
+                   class="nav-card next text-decoration-none">
+                    <span class="nav-label">下一章 →</span>
+                    <div class="nav-title">{{ next_material.title }}</div>
+                </a>
+                {% endif %}
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- 平滑滚动脚本 -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 为所有目录链接添加平滑滚动
+    document.querySelectorAll('.toc-item').forEach(function(link) {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const targetId = this.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+            
+            if (targetElement) {
+                const headerOffset = 100;
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: 'smooth'
+                });
+
+                // 高亮当前激活的目录项
+                document.querySelectorAll('.toc-item').forEach(function(item) {
+                    item.style.backgroundColor = 'transparent';
+                    item.style.fontWeight = 'normal';
+                });
+                this.style.backgroundColor = 'rgba(0, 164, 244, 0.1)';
+                this.style.fontWeight = '600';
+            }
+        });
+    });
+
+    // 滚动时自动高亮当前章节
+    window.addEventListener('scroll', function() {
+        const headings = document.querySelectorAll('.article-body h2, .article-body h3');
+        let currentHeading = '';
+
+        headings.forEach(function(heading) {
+            const rect = heading.getBoundingClientRect();
+            if (rect.top <= 150) {
+                currentHeading = heading.getAttribute('id') || heading.textContent.trim();
+            }
+        });
+
+        if (currentHeading) {
+            document.querySelectorAll('.toc-item').forEach(function(item) {
+                const itemText = item.textContent.trim();
+                if (itemText === currentHeading || currentHeading.includes(itemText)) {
+                    item.style.backgroundColor = 'rgba(0, 164, 244, 0.1)';
+                    item.style.fontWeight = '600';
+                } else {
+                    item.style.backgroundColor = 'transparent';
+                    item.style.fontWeight = 'normal';
+                }
+            });
+        }
+    });
+});
+</script>
+{% endblock %}
