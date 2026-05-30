@@ -50,7 +50,7 @@
                     <small class="text-muted">这可能需要 5-15 秒时间</small>
                     <div class="mt-3">
                         <div class="progress" style="height: 4px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background-color: rgb(0, 164, 244);"></div>
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background-color: var(--color-primary);"></div>
                         </div>
                     </div>
                 </div>
@@ -62,7 +62,7 @@
                     
                     <div class="row mb-4">
                         <div class="col-md-4 text-center">
-                            <div class="card text-white" style="background-color: rgb(0, 164, 244);">
+                            <div class="card text-white" style="background-color: var(--color-primary);">
                                 <div class="card-body">
                                     <h2 class="display-4">{{ result.overall_score }}</h2>
                                     <p class="mb-0">综合得分</p>
@@ -82,7 +82,7 @@
                                         <div class="progress" style="height: 22px; border-radius: 11px; overflow: hidden;">
                                             <div class="progress-bar" 
                                                  role="progressbar" 
-                                                 style="width: {{ score }}%; background-color: rgb(0, 164, 244); transition: width 0.8s ease;"
+                                                 style="width: {{ score }}%; background-color: var(--color-primary); transition: width 0.8s ease;"
                                                  aria-valuenow="{{ score }}" 
                                                  aria-valuemin="0" 
                                                  aria-valuemax="100">

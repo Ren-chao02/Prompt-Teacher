@@ -5,6 +5,21 @@ from django import template
 register = template.Library()
 
 
+@register.filter
+def category_label(category):
+    """
+    将分类代码转换为带图标的中文标签
+    解决模板中重复的分类判断逻辑
+    """
+    labels = {
+        'basic': '🌱 基础入门',
+        'intermediate': '⚡ 进阶技巧',
+        'advanced': '🚀 高级应用',
+        'best_practices': '💎 最佳实践',
+    }
+    return labels.get(category, str(category))
+
+
 def generate_anchor(title):
     """生成锚点ID（将标题转换为小写，特殊字符替换为连字符）"""
     # 先去除 Markdown 标记

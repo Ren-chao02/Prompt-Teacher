@@ -1,0 +1,277 @@
+{% extends 'base.html' %}
+
+{% block title %}练习详情 - 提示词教学平台{% endblock %}
+
+{% block extra_css %}
+<style>
+.detail-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #00A4F4;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 25px;
+}
+
+.back-link:hover {
+    gap: 12px;
+}
+
+.detail-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 35px;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.detail-header h1 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.meta-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.meta-item {
+    background: rgba(255,255,255,0.15);
+    padding: 15px;
+    border-radius: 8px;
+}
+
+.meta-label {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    margin-bottom: 5px;
+}
+
+.meta-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr 400px;
+    gap: 25px;
+}
+
+.section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.prompt-content {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    line-height: 1.8;
+    color: #333;
+    font-size: 0.95rem;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+.scores-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.score-item {
+    background: #f8f9fa;
+    padding: 18px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.score-label {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.score-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #00A4F4;
+}
+
+.overall-score-card {
+    background: linear-gradient(135deg, #E3F2FD, #E0F7FA);
+    border-radius: 12px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.overall-score-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: #00A4F4;
+    margin-bottom: 10px;
+}
+
+.suggestions-box {
+    background: #FFF9C4;
+    border-left: 4px solid #FBC02D;
+    padding: 18px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+.strengths-box {
+    background: #E8F5E9;
+    border-left: 4px solid #4CAF50;
+    padding: 18px;
+    border-radius: 8px;
+    margin-top: 15px;
+}
+
+@media (max-width: 992px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="detail-container">
+    <a href="{% url 'practice:history' %}" class="back-link">
+        ← 返回记录列表
+    </a>
+
+    <div class="detail-header">
+        <h1>
+            <span style="font-size: 2.2rem;">{{ record.scenario.icon|default:"📝" }}</span>
+            {{ record.scenario.title|default:"练习详情" }}
+        </h1>
+        
+        {% if record.topic %}
+        <p style="font-size: 1.1rem; opacity: 0.95; margin-bottom: 10px;">
+            📌 {{ record.get_topic_display }}
+        </p>
+        {% endif %}
+        
+        <div class="meta-info">
+            <div class="meta-item">
+                <div class="meta-label">🕐 练习时间</div>
+                <div class="meta-value">{{ record.created_at|date:"Y-m-d H:i:s" }}</div>
+            </div>
+            
+            <div class="meta-item">
+                <div class="meta-label">⏱️ 耗时</div>
+                <div class="meta-value">{{ record.formatted_duration }}</div>
+            </div>
+            
+            <div class="meta-item">
+                <div class="meta-label">🎯 得分</div>
+                <div class="meta-value">{{ record.overall_score }}分</div>
+            </div>
+            
+            <div class="meta-item">
+                <div class="meta-label">🔄 更新时间</div>
+                <div class="meta-value">{{ record.updated_at|date:"Y-m-d H:i:s" }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <!-- 左侧：提示词内容 -->
+        <div>
+            <div class="section-card">
+                <h2 class="section-title">📝 你的提示词</h2>
+                <div class="prompt-content">{{ record.user_prompt }}</div>
+            </div>
+
+            {% if record.system_prompt %}
+            <div class="section-card">
+                <h2 class="section-title">🤖 系统提示词（场景）</h2>
+                <div class="prompt-content">{{ record.system_prompt }}</div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- 右侧：评估结果 -->
+        <div>
+            <div class="overall-score-card">
+                <div style="font-size: 1rem; color: #666; margin-bottom: 10px;">综合得分</div>
+                <div class="overall-score-value">{{ record.overall_score }}</div>
+                <div style="font-size: 0.95rem; color: #666;">满分100分</div>
+            </div>
+
+            <div class="section-card">
+                <h2 class="section-title">📊 各维度评分</h2>
+                
+                <div class="scores-grid">
+                    {% for dimension, score in record.scores.items %}
+                    <div class="score-item">
+                        <div class="score-label">
+                            {% if dimension == 'clarity' %}清晰度
+                            {% elif dimension == 'completeness' %}完整性
+                            {% elif dimension == 'structure' %}结构化
+                            {% elif dimension == 'creativity' %}创造性
+                            {% elif dimension == 'actionability' %}可执行性
+                            {% elif dimension == 'context_awareness' %}上下文感知
+                            {% else %}{{ dimension|title }}
+                            {% endif %}
+                        </div>
+                        <div class="score-value">{{ score }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if record.suggestions %}
+            <div class="suggestions-box">
+                <strong style="color: #F57F17; font-size: 1.05rem; display: block; margin-bottom: 10px;">
+                    💡 改进建议
+                </strong>
+                <p style="margin: 0; line-height: 1.7; color: #555;">{{ record.suggestions }}</p>
+            </div>
+            {% endif %}
+
+            {% if record.strengths %}
+            <div class="strengths-box">
+                <strong style="color: #2E7D32; font-size: 1.05rem; display: block; margin-bottom: 10px;">
+                    ✨ 优点亮点
+                </strong>
+                <p style="margin: 0; line-height: 1.7; color: #555;">{{ record.strengths }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

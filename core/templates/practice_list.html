@@ -1,0 +1,234 @@
+{% extends 'base.html' %}
+
+{% block title %}实战练习 - 提示词教学平台{% endblock %}
+
+{% block extra_css %}
+<style>
+.practice-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.page-title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.page-subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.scenarios-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+.scenario-card {
+    background: white;
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    position: relative;
+    overflow: hidden;
+}
+
+.scenario-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #00A4F4, #00D4AA);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.scenario-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 24px rgba(0,164,244,0.15);
+    border-color: #00A4F4;
+}
+
+.scenario-card:hover::before {
+    transform: scaleX(1);
+}
+
+.card-icon {
+    font-size: 3rem;
+    margin-bottom: 20px;
+    display: block;
+}
+
+.card-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+.card-description {
+    font-size: 0.95rem;
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.card-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    border-top: 1px solid #f0f0f0;
+}
+
+.difficulty-badge {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.difficulty-beginner {
+    background: #E8F5E9;
+    color: #2E7D32;
+}
+
+.difficulty-intermediate {
+    background: #FFF3E0;
+    color: #EF6C00;
+}
+
+.difficulty-advanced {
+    background: #FCE4EC;
+    color: #C2185B;
+}
+
+.topics-count {
+    font-size: 0.9rem;
+    color: #999;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.stats-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 40px;
+    color: white;
+    text-align: center;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.stat-item h3 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.stat-item p {
+    font-size: 1rem;
+    opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+    .scenarios-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .page-title {
+        font-size: 2rem;
+    }
+    
+    .practice-container {
+        padding: 20px 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="practice-container">
+    <div class="page-header">
+        <h1 class="page-title">
+            <span>🎮</span>
+            <span>实战练习</span>
+        </h1>
+        <p class="page-subtitle">
+            选择一个场景，通过实际练习提升你的提示词编写能力。<br>
+            每个场景包含两个主题，覆盖不同的应用方向。
+        </p>
+    </div>
+
+    <div class="scenarios-grid">
+        {% for scenario in scenarios %}
+        <a href="{% url 'practice:practice_detail' scenario.scenario_id %}" class="scenario-card" style="text-decoration: none; color: inherit;">
+            <span class="card-icon">{{ scenario.icon }}</span>
+            <h3 class="card-title">{{ scenario.title }}</h3>
+            <p class="card-description">{{ scenario.description }}</p>
+            
+            <div class="card-meta">
+                <span class="difficulty-badge difficulty-{{ scenario.difficulty }}">
+                    {% if scenario.difficulty == 'beginner' %}初级
+                    {% elif scenario.difficulty == 'intermediate' %}中级
+                    {% else %}高级
+                    {% endif %}
+                </span>
+                <span class="topics-count">
+                    📝 {{ scenario.topics.count }} 个主题
+                </span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="stats-section">
+        <h2 style="font-size: 1.8rem; margin-bottom: 10px;">📊 练习统计</h2>
+        <p style="opacity: 0.9;">持续练习，见证成长</p>
+        
+        <div class="stats-grid">
+            <div class="stat-item">
+                <h3>{{ scenarios.count }}</h3>
+                <p>个专业场景</p>
+            </div>
+            <div class="stat-item">
+                <h3>{{ scenarios|length|add:scenarios|length }}</h3>
+                <p>个练习主题</p>
+            </div>
+            <div class="stat-item">
+                <h3>∞</h3>
+                <p>无限次练习</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

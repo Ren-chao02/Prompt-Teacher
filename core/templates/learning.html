@@ -1,28 +1,29 @@
 {% extends 'base.html' %}
+{% load learning_extras %}
 
 {% block title %}学习中心 - 提示词教学平台{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
-        <h2 class="mb-4" style="color: rgb(0, 164, 244);">📚 学习中心</h2>
+        <h2 class="mb-4" style="color: var(--color-primary);">📚 学习中心</h2>
         <p class="text-muted mb-4">系统学习提示词工程，从入门到精通的专业课程</p>
         
         <!-- 分类筛选卡片 -->
-        <div class="card mb-4 shadow-sm" style="border-top: 3px solid rgb(0, 164, 244);">
+        <div class="card mb-4 shadow-sm" style="border-top: 3px solid var(--color-primary);">
             <div class="card-body">
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-                    <h5 class="mb-0" style="color: rgb(0, 164, 244);">📂 课程分类</h5>
+                    <h5 class="mb-0" style="color: var(--color-primary);">📂 课程分类</h5>
                     <div class="btn-group flex-wrap" role="group">
                         <a href="?category=all" 
                            class="btn {% if selected_category == 'all' %}active{% endif %}"
-                           style="{% if selected_category == 'all' %}background-color: rgb(0, 164, 244); color: white; border-color: rgb(0, 164, 244);{% else %}border-color: rgb(0, 164, 244); color: rgb(0, 164, 244);{% endif %}">
+                           style="{% if selected_category == 'all' %}background-color: var(--color-primary); color: white; border-color: var(--color-primary);{% else %}border-color: var(--color-primary); color: var(--color-primary);{% endif %}">
                             📋 全部
                         </a>
                         {% for key, label in categories %}
                         <a href="?category={{ key }}" 
                            class="btn {% if selected_category == key %}active{% endif %}"
-                           style="{% if selected_category == key %}background-color: rgb(0, 164, 244); color: white; border-color: rgb(0, 164, 244);{% else %}border-color: rgb(0, 164, 244); color: rgb(0, 164, 244);{% endif %}">
+                           style="{% if selected_category == key %}background-color: var(--color-primary); color: white; border-color: var(--color-primary);{% else %}border-color: var(--color-primary); color: var(--color-primary);{% endif %}">
                             {{ label }}
                         </a>
                         {% endfor %}
@@ -35,16 +36,12 @@
         <div class="row">
             {% for material in materials %}
             <div class="col-md-6 col-lg-4 mb-4">
-                <div class="card h-100 shadow-sm hover-card" style="border-left: 4px solid rgb(0, 164, 244); transition: transform 0.2s;">
+                <div class="card h-100 shadow-sm hover-card" style="border-left: 4px solid var(--color-primary); transition: transform 0.2s;">
                     <div class="card-body d-flex flex-column">
                         <!-- 分类标签 -->
                         <div class="d-flex justify-content-between align-items-start mb-3">
-                            <span class="badge" style="background-color: rgb(0, 164, 244); color: white; font-size: 0.85em; padding: 0.5em 1em;">
-                                {% if material.category == 'basic' %}🌱 基础入门
-                                {% elif material.category == 'intermediate' %}⚡ 进阶技巧
-                                {% elif material.category == 'advanced' %}🚀 高级应用
-                                {% elif material.category == 'best_practices' %}💎 最佳实践
-                                {% else %}{{ material.get_category_display }}{% endif %}
+                            <span class="badge" style="background-color: var(--color-primary); color: white; font-size: 0.85em; padding: 0.5em 1em;">
+                                {{ material.category|category_label }}
                             </span>
                             <small class="text-muted">#{{ material.order_index }}</small>
                         </div>
@@ -67,7 +64,7 @@
                         <div class="mt-auto pt-3 border-top">
                             <a href="{% url 'learning:detail' material.id %}" 
                                class="btn w-100"
-                               style="background-color: rgb(0, 164, 244); color: white; border: none; font-weight: 500;">
+                               style="background-color: var(--color-primary); color: white; border: none; font-weight: 500;">
                                 📖 开始阅读
                             </a>
                         </div>
@@ -84,8 +81,8 @@
         </div>
         
         <!-- 学习进度提示 -->
-        <div class="alert alert-light mt-4 text-center" style="border-left: 4px solid rgb(0, 164, 244);">
-            <strong style="color: rgb(0, 164, 244);">💡 学习建议：</strong>
+        <div class="alert alert-light mt-4 text-center" style="border-left: 4px solid var(--color-primary);">
+            <strong style="color: var(--color-primary);">💡 学习建议：</strong>
             建议按照顺序从基础开始学习，每学完一个章节后到练习模块进行实战演练！
         </div>
         
@@ -94,7 +91,7 @@
             <div style="font-size: 4rem; margin-bottom: 1rem;">📭</div>
             <h4 class="text-muted mb-2">该分类下暂无学习资料</h4>
             <p class="text-muted">敬请期待更多精彩内容！</p>
-            <a href="?category=all" class="btn mt-3" style="background-color: rgb(0, 164, 244); color: white;">查看全部课程</a>
+            <a href="?category=all" class="btn mt-3" style="background-color: var(--color-primary); color: white;">查看全部课程</a>
         </div>
         {% endif %}
     </div>

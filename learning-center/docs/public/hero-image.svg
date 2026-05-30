@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="600" height="400">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F8FAFC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#E2E8F0;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00A4F4;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0089CC;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="600" height="400" fill="url(#bgGrad)" rx="20"/>
+  
+  <!-- 装饰圆 -->
+  <circle cx="500" cy="80" r="60" fill="#00A4F4" opacity="0.1"/>
+  <circle cx="100" cy="320" r="80" fill="#00A4F4" opacity="0.08"/>
+  
+  <!-- 主卡片 - 提示词编辑器 -->
+  <g transform="translate(150, 80)">
+    <!-- 卡片背景 -->
+    <rect width="300" height="240" fill="white" rx="12" filter="url(#shadow)"/>
+    
+    <!-- 标题栏 -->
+    <rect width="300" height="40" fill="#F8FAFC" rx="12"/>
+    <rect y="28" width="300" height="12" fill="#F8FAFC"/>
+    <circle cx="25" cy="20" r="6" fill="#EF4444"/>
+    <circle cx="45" cy="20" r="6" fill="#F59E0B"/>
+    <circle cx="65" cy="20" r="6" fill="#10B981"/>
+    
+    <!-- 标题文字 -->
+    <text x="140" y="25" font-family="Inter, sans-serif" font-size="14" fill="#64748B" text-anchor="middle">Prompt Editor</text>
+    
+    <!-- 角色标签 -->
+    <rect x="20" y="55" width="60" height="24" fill="#E0F2FE" rx="4"/>
+    <text x="50" y="71" font-family="Inter, sans-serif" font-size="11" fill="#0369A1" text-anchor="middle">角色</text>
+    
+    <!-- 任务标签 -->
+    <rect x="90" y="55" width="60" height="24" fill="#F0FDF4" rx="4"/>
+    <text x="120" y="71" font-family="Inter, sans-serif" font-size="11" fill="#166534" text-anchor="middle">任务</text>
+    
+    <!-- 格式标签 -->
+    <rect x="160" y="55" width="60" height="24" fill="#FEF3C7" rx="4"/>
+    <text x="190" y="71" font-family="Inter, sans-serif" font-size="11" fill="#92400E" text-anchor="middle">格式</text>
+    
+    <!-- 文本内容区域 -->
+    <rect x="20" y="90" width="260" height="70" fill="#F8FAFC" rx="6" stroke="#E2E8F0" stroke-width="1"/>
+    
+    <!-- 模拟文本行 -->
+    <line x1="30" y1="108" x2="250" y2="108" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="30" y1="125" x2="220" y2="125" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    <line x1="30" y1="142" x2="180" y2="142" stroke="#CBD5E1" stroke-width="2" stroke-linecap="round"/>
+    
+    <!-- AI响应区域 -->
+    <rect x="20" y="175" width="260" height="50" fill="url(#accentGrad)" opacity="0.08" rx="6"/>
+    <text x="35" y="198" font-family="Inter, sans-serif" font-size="12" fill="#00A4F4" font-weight="500">AI Response</text>
+    <line x1="35" y1="212" x2="240" y2="212" stroke="#00A4F4" stroke-width="1.5" stroke-linecap="round" opacity="0.5"/>
+  </g>
+  
+  <!-- 装饰元素 - 浮动图标 -->
+  <g transform="translate(480, 180)">
+    <circle cx="40" cy="40" r="35" fill="white" filter="url(#shadow)"/>
+    <text x="40" y="48" font-family="Inter, sans-serif" font-size="32" text-anchor="middle">💡</text>
+  </g>
+  
+  <g transform="translate(50, 120)">
+    <circle cx="30" cy="30" r="28" fill="white" filter="url(#shadow)"/>
+    <text x="30" y="38" font-family="Inter, sans-serif" font-size="26" text-anchor="middle">🚀</text>
+  </g>
+  
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#000000" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+</svg>

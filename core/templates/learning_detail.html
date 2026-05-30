@@ -5,49 +5,49 @@
 
 {% block extra_css %}
 <style>
-/* 学习详情页专用样式 - 更宽的布局 */
+/* 学习详情页专用样式 - 使用设计令牌系统 */
 
 /* 页面包装器：使用更宽的最大宽度 */
 .learning-page-wrapper {
-    max-width: 1600px;  /* 从默认的1140px扩展到1600px */
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 2rem;
+    padding: 0 var(--space-xl);
 }
 
 @media (max-width: 1700px) {
     .learning-page-wrapper {
         max-width: 1400px;
-        padding: 0 1.5rem;
+        padding: 0 var(--space-lg);
     }
 }
 
 @media (max-width: 1440px) {
     .learning-page-wrapper {
         max-width: 1200px;
-        padding: 0 1rem;
+        padding: 0 var(--space-md);
     }
 }
 
 .learning-container {
     display: flex;
-    gap: 2.5rem;  /* 增加间距 */
-    margin-top: 1rem;
-    transition: all 0.3s ease;
+    gap: var(--space-2xl);
+    margin-top: var(--space-md);
+    transition: all var(--transition-normal);
 }
 
 /* 左侧目录样式 */
 .sidebar-toc {
-    width: 300px;  /* 稍微加宽 */
+    width: 300px;
     flex-shrink: 0;
     position: sticky;
     top: 2rem;
     height: calc(100vh - 4rem);
     overflow-y: auto;
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     box-shadow: 0 2px 8px rgba(0, 164, 244, 0.1);
     border: 1px solid rgba(0, 164, 244, 0.15);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-slow);
     overflow-x: hidden;
 }
 
@@ -88,27 +88,27 @@
 
 .toc-header h6 {
     margin: 0;
-    color: rgb(0, 164, 244);
-    font-weight: 700;
+    color: var(--color-primary);
+    font-weight: var(--font-weight-bold);
     font-size: 1rem;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--space-sm);
 }
 
 /* 折叠按钮样式 */
 .toc-toggle-btn {
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    background: var(--color-primary-gradient);
     border: none;
     color: white;
     width: 32px;
     height: 32px;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
     box-shadow: 0 2px 8px rgba(0, 164, 244, 0.3);
     flex-shrink: 0;
 }
@@ -120,7 +120,7 @@
 
 .toc-toggle-btn .toggle-icon {
     display: inline-block;
-    transition: transform 0.3s ease;
+    transition: transform var(--transition-normal);
     font-size: 20px;
     line-height: 1;
 }
@@ -138,15 +138,15 @@
     transform: translateY(-50%);
     width: 50px;
     height: 50px;
-    border-radius: 25px;
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    border-radius: var(--radius-full);
+    background: var(--color-primary-gradient);
     border: none;
     color: white;
     font-size: 22px;
     cursor: pointer;
     box-shadow: 0 4px 16px rgba(0, 164, 244, 0.4);
     z-index: 1000;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
     animation: pulse 2s infinite;
 }
 
@@ -161,26 +161,26 @@
 }
 
 .toc-content {
-    padding: 1rem 0;
+    padding: var(--space-md) 0;
     max-height: calc(100vh - 10rem);
     overflow-y: auto;
 }
 
 .toc-item {
     display: block;
-    padding: 0.5rem 1.5rem;
+    padding: var(--space-sm) 1.5rem;
     color: #555;
     text-decoration: none;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
+    font-size: var(--font-size-sm);
+    transition: all var(--transition-fast);
     border-left: 3px solid transparent;
     line-height: 1.5;
 }
 
 .toc-item:hover {
-    color: rgb(0, 164, 244);
+    color: var(--color-primary);
     background-color: rgba(0, 164, 244, 0.05);
-    border-left-color: rgb(0, 164, 244);
+    border-left-color: var(--color-primary);
 }
 
 .toc-item.level-2 {
@@ -202,15 +202,15 @@
 
 .article-card {
     background: white;
-    border-radius: 12px;
+    border-radius: var(--radius-xl);
     box-shadow: 0 2px 12px rgba(0, 164, 244, 0.08);
-    border-top: 4px solid rgb(0, 164, 244);
+    border-top: 4px solid var(--color-primary);
     overflow: hidden;
 }
 
 .article-header {
     padding: 2.5rem 3rem 2rem;
-    border-bottom: 1px solid #e9ecef;
+    border-bottom: 1px solid var(--color-border-light);
     background: linear-gradient(to bottom, rgba(0, 164, 244, 0.03) 0%, transparent 100%);
 }
 
@@ -219,18 +219,18 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.5rem 1.25rem;
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    background: var(--color-primary-gradient);
     color: white;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 0.95rem;
+    border-radius: var(--radius-20);
+    font-weight: var(--font-weight-semibold);
+    font-size: var(--font-size-base);
     box-shadow: 0 2px 8px rgba(0, 164, 244, 0.3);
 }
 
 .article-title {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: #1a1a1a;
+    font-size: var(--font-size-4xl);
+    font-weight: var(--font-weight-extrabold);
+    color: var(--color-text-primary);
     margin: 1.25rem 0 1rem;
     line-height: 1.3;
 }
@@ -238,8 +238,8 @@
 .article-meta {
     display: flex;
     flex-wrap: wrap;
-    gap: 1.5rem;
-    color: #6c757d;
+    gap: var(--space-lg);
+    color: var(--color-text-muted);
     font-size: 0.92rem;
 }
 
@@ -250,17 +250,17 @@
 }
 
 .article-body {
-    padding: 3rem;
-    line-height: 1.85;
-    font-size: 1.05rem;
+    padding: var(--space-3xl);
+    line-height: var(--line-height-loose);
+    font-size: var(--font-size-lg);
     color: #333;
 }
 
 /* Markdown内容渲染样式 */
 .article-body h2 {
-    color: rgb(0, 164, 244);
-    font-size: 1.75rem;
-    font-weight: 700;
+    color: var(--color-primary);
+    font-size: var(--font-size-3xl);
+    font-weight: var(--font-weight-bold);
     margin: 3rem 0 1.25rem;
     padding-bottom: 0.75rem;
     border-bottom: 3px solid rgba(0, 164, 244, 0.15);
@@ -268,27 +268,18 @@
 }
 
 .article-body h3 {
-    color: #2c3e50;
+    color: var(--color-text-secondary);
     font-size: 1.45rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     margin: 2.5rem 0 1rem;
     scroll-margin-top: 2rem;
 }
 
 .article-body h4 {
     color: #34495e;
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-semibold);
     margin: 2rem 0 0.875rem;
-}
-
-/* 特定标题样式调整 */
-.article-body h1#零样本提示-zero-shot-prompting {
-    font-size: 23px;
-}
-
-.article-body h2#什么是零样本提示 {
-    font-size: 21px;
 }
 
 .article-body p {
@@ -308,12 +299,12 @@
 }
 
 .article-body li::marker {
-    color: rgb(0, 164, 244);
+    color: var(--color-primary);
 }
 
 .article-body strong {
-    color: #2c3e50;
-    font-weight: 700;
+    color: var(--color-text-secondary);
+    font-weight: var(--font-weight-bold);
 }
 
 .article-body em {
@@ -322,21 +313,21 @@
 }
 
 .article-body code {
-    background: linear-gradient(135deg, #f8f9fa 0%, #fff 100%);
+    background: linear-gradient(135deg, var(--color-bg-light) 0%, #fff 100%);
     color: #d63384;
     padding: 0.25rem 0.6rem;
-    border-radius: 6px;
-    font-family: 'Consolas', 'Monaco', monospace;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-family-mono);
     font-size: 0.88em;
-    border: 1px solid #e9ecef;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--color-border-light);
+    box-shadow: var(--shadow-sm);
 }
 
 .article-body pre {
     background: linear-gradient(135deg, #282c34 0%, #21252b 100%);
     color: #abb2bf;
     padding: 1.75rem;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     overflow-x: auto;
     margin: 2rem 0;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
@@ -365,12 +356,12 @@
 }
 
 .article-body blockquote {
-    border-left: 5px solid rgb(0, 164, 244);
+    border-left: 5px solid var(--color-primary);
     padding: 1.25rem 1.75rem;
     margin: 2rem 0;
     background: linear-gradient(to right, rgba(0, 164, 244, 0.04) 0%, transparent 100%);
-    border-radius: 0 8px 8px 0;
-    color: #495057;
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    color: var(--color-text-tertiary);
     font-style: italic;
     font-size: 1.02rem;
 }
@@ -380,28 +371,28 @@
     margin: 2rem 0;
     border-collapse: separate;
     border-spacing: 0;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .article-body thead {
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    background: var(--color-primary-gradient);
     color: white;
 }
 
 .article-body th {
     padding: 1rem 1.25rem;
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     text-align: left;
-    font-size: 0.95rem;
+    font-size: var(--font-size-base);
     letter-spacing: 0.02em;
 }
 
 .article-body td {
     padding: 0.95rem 1.25rem;
-    border-bottom: 1px solid #e9ecef;
-    color: #495057;
+    border-bottom: 1px solid var(--color-border-light);
+    color: var(--color-text-tertiary);
 }
 
 .article-body tbody tr:hover {
@@ -411,31 +402,31 @@
 .article-body hr {
     border: none;
     height: 2px;
-    background: linear-gradient(to right, transparent 0%, rgb(0, 164, 244) 50%, transparent 100%);
+    background: linear-gradient(to right, transparent 0%, var(--color-primary) 50%, transparent 100%);
     margin: 3rem 0;
     opacity: 0.3;
 }
 
 .article-footer {
-    padding: 2rem 3rem;
-    border-top: 2px solid #e9ecef;
-    background: #f8f9fa;
+    padding: var(--space-2xl) 3rem;
+    border-top: 2px solid var(--color-border-light);
+    background: var(--color-bg-light);
 }
 
 .action-buttons {
     display: flex;
-    gap: 1rem;
+    gap: var(--space-md);
     flex-wrap: wrap;
 }
 
 .btn-primary-custom {
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    background: var(--color-primary-gradient);
     color: white;
     border: none;
     padding: 0.75rem 2rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-normal);
     box-shadow: 0 4px 12px rgba(0, 164, 244, 0.3);
 }
 
@@ -447,16 +438,16 @@
 
 .btn-outline-custom {
     background: white;
-    color: rgb(0, 164, 244);
-    border: 2px solid rgb(0, 164, 244);
+    color: var(--color-primary);
+    border: 2px solid var(--color-primary);
     padding: 0.7rem 1.75rem;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-weight-semibold);
+    transition: all var(--transition-normal);
 }
 
 .btn-outline-custom:hover {
-    background: rgb(0, 164, 244);
+    background: var(--color-primary);
     color: white;
     transform: translateY(-2px);
 }
@@ -465,26 +456,26 @@
 .chapter-nav {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    margin-top: 2rem;
+    gap: var(--space-lg);
+    margin-top: var(--space-2xl);
 }
 
 .nav-card {
     padding: 1.5rem;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     text-decoration: none;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
     border: 2px solid transparent;
 }
 
 .nav-card.prev {
     background: linear-gradient(135deg, rgba(0, 164, 244, 0.05) 0%, rgba(0, 164, 244, 0.02) 100%);
-    border-left: 4px solid rgb(0, 164, 244);
+    border-left: 4px solid var(--color-primary);
 }
 
 .nav-card.next {
     background: linear-gradient(135deg, rgba(0, 164, 244, 0.05) 0%, rgba(0, 164, 244, 0.02) 100%);
-    border-right: 4px solid rgb(0, 164, 244);
+    border-right: 4px solid var(--color-primary);
     text-align: right;
 }
 
@@ -494,16 +485,16 @@
 }
 
 .nav-label {
-    font-size: 0.85rem;
-    color: #6c757d;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
     margin-bottom: 0.5rem;
     display: block;
 }
 
 .nav-title {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: rgb(0, 164, 244);
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-primary);
 }
 
 /* 响应式设计 */
@@ -517,7 +508,7 @@
         position: static;
         height: auto;
         max-height: 400px;
-        order: -1; /* 移动端目录显示在顶部 */
+        order: -1;
     }
     
     .sidebar-toc.collapsed {
@@ -541,7 +532,7 @@
         bottom: 20px;
         transform: none;
     }
-    
+
     .toc-expand-fab:hover {
         transform: scale(1.1);
     }
@@ -574,7 +565,7 @@
     width: 56px;
     height: 56px;
     border-radius: 28px;
-    background: linear-gradient(135deg, rgb(0, 164, 244) 0%, #0096d6 100%);
+    background: var(--color-primary-gradient);
     border: none;
     color: white;
     cursor: pointer;
@@ -583,7 +574,7 @@
     justify-content: center;
     box-shadow: 0 4px 20px rgba(0, 164, 244, 0.4);
     z-index: 999;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--transition-slow);
     opacity: 0;
     visibility: hidden;
     transform: translateY(20px);
@@ -597,431 +588,174 @@
 
 .back-to-top-btn:hover {
     transform: translateY(-5px);
-    box-shadow: 0 8px 30px rgba(0, 164, 244, 0.6);
-    background: linear-gradient(135deg, #0096d6 0%, rgb(0, 164, 244) 100%);
-}
-
-.back-to-top-btn:active {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 16px rgba(0, 164, 244, 0.5);
-}
-
-.back-to-top-icon {
-    width: 32px;
-    height: 32px;
-    display: block;
-}
-
-/* 移动端适配：返回顶部按钮稍小一些 */
-@media (max-width: 768px) {
-    .back-to-top-btn {
-        width: 48px;
-        height: 48px;
-        bottom: 25px;
-        right: 25px;
-        border-radius: 24px;
-    }
-
-    .back-to-top-icon {
-        width: 28px;
-        height: 28px;
-    }
-
-    /* 避免与展开目录按钮重叠 */
-    .toc-expand-fab {
-        left: 15px;
-        bottom: 90px;  /* 在返回顶部按钮上方 */
-    }
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<!-- 使用更宽的容器 -->
 <div class="learning-page-wrapper">
-    <!-- 面包屑导航 -->
-    <nav aria-label="breadcrumb" class="mb-3">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item">
-                <a href="{% url 'learning:list' %}" style="color: rgb(0, 164, 244);">📚 学习中心</a>
-            </li>
-            <li class="breadcrumb-item active">{{ material.title }}</li>
-        </ol>
-    </nav>
-
-    <!-- 主容器：左侧目录 + 右侧内容 -->
     <div class="learning-container">
         
-        <!-- 左侧目录导航（可折叠） -->
-        {% with toc=material.content|extract_toc %}
-        {% if toc %}
+        <!-- 左侧目录 -->
         <aside class="sidebar-toc" id="sidebarToc">
-            <!-- 目录头部（含折叠按钮） -->
             <div class="toc-header">
                 <h6>📑 本章目录</h6>
-                <button class="toc-toggle-btn" id="tocToggleBtn" 
-                        title="折叠/展开目录" aria-label="切换目录显示">
+                <button class="toc-toggle-btn" onclick="toggleTOC()" title="折叠/展开目录">
                     <span class="toggle-icon">◀</span>
                 </button>
             </div>
             
-            <!-- 目录内容区域（可隐藏） -->
-            <nav class="toc-content" id="tocContent">
-                {% for item in toc %}
-                <a href="#{{ item.anchor }}" 
-                   class="toc-item level-{{ item.level }}"
-                   data-scroll="smooth">
-                    {{ item.title }}
-                </a>
-                {% endfor %}
-            </nav>
+            <div class="toc-content" id="tocContent">
+                {% with toc=material.content|extract_toc %}
+                    {% for item in toc %}
+                        <a href="#{{ item.anchor }}" 
+                           class="toc-item level-{{ item.level }}"
+                           onclick="scrollToSection('{{ item.anchor }}')">
+                            {{ item.title }}
+                        </a>
+                    {% empty %}
+                        <div style="padding: 1rem 1.5rem; color: #999; font-size: 0.9rem;">
+                            📝 暂无章节标题
+                        </div>
+                    {% endfor %}
+                {% endwith %}
+            </div>
         </aside>
-        
-        <!-- 移动端/折叠状态下的展开按钮 -->
-        <button class="toc-expand-fab" id="tocExpandFab" 
-                title="展开目录" style="display: none;">
-            📑
+
+        <!-- 展开按钮（折叠时显示） -->
+        <button class="toc-expand-fab" id="expandFab" 
+                onclick="toggleTOC()" 
+                style="display: none;"
+                title="展开目录">
+            📋
         </button>
-        {% endif %}
-        {% endwith %}
 
         <!-- 主内容区域 -->
         <main class="main-content">
-            
-            <!-- 文章主体 -->
             <article class="article-card">
                 
                 <!-- 文章头部 -->
                 <header class="article-header">
                     <span class="badge-category">
-                        {% if material.category == 'basic' %}🌱 基础入门
-                        {% elif material.category == 'intermediate' %}⚡ 进阶技巧
-                        {% elif material.category == 'advanced' %}🚀 高级应用
-                        {% elif material.category == 'best_practices' %}💎 最佳实践
-                        {% else %}{{ material.get_category_display }}{% endif %}
+                        {{ material.category|category_label }}
                     </span>
-                    
+
                     <h1 class="article-title">{{ material.title }}</h1>
-                    
+
                     <div class="article-meta">
-                        <span class="meta-item">
-                            📅 {{ material.created_at|date:"Y年m月d日 H:i" }}
-                        </span>
-                        <span class="meta-item">
-                            ⏱️ 阅读时间：约 {{ material.reading_time }} 分钟
-                        </span>
-                        <span class="meta-item">
-                            📊 字数：约 {{ material.content|length }} 字
-                        </span>
-                        <span class="meta-item">
-                            📖 第 {{ material.order_index }} 章
-                        </span>
+                        <span class="meta-item">📅 {{ material.created_at|date:"Y年m月d日 H:i" }}</span>
+                        <span class="meta-item">⏱️ 约 {{ material.reading_time }} 分钟阅读</span>
+                        <span class="meta-item">👁️ 浏览 {{ material.view_count|default:'0' }} 次</span>
                     </div>
                 </header>
 
-                <!-- Markdown渲染的内容 -->
+                <!-- 文章正文（Markdown渲染后的HTML） -->
                 <div class="article-body">
                     {{ material.content|markdown_to_html|safe }}
                 </div>
 
-                <!-- 底部操作栏 -->
+                <!-- 文章底部操作区 -->
                 <footer class="article-footer">
+                    
                     <div class="action-buttons">
-                        <a href="{% url 'practice:practice' %}" 
-                           class="btn-primary-custom btn">
-                            🎯 去练习实战
+                        <a href="{% url 'practice:practice' %}" class="btn btn-primary-custom">
+                            💪 去练习 →
                         </a>
-                        <a href="{% url 'learning:list' %}" 
-                           class="btn-outline-custom btn">
-                            ← 返回课程列表
+                        <a href="{% url 'practice:history' %}" class="btn btn-outline-custom">
+                            📊 查看我的记录
+                        </a>
+                        <a href="{% url 'learning:list' %}?category={{ material.category }}" class="btn btn-outline-custom">
+                            ← 返回列表
                         </a>
                     </div>
-                    
-                    <p class="text-muted mt-3 mb-0 small">
-                        💡 <strong>学习建议：</strong>学完本章后，强烈建议到练习模块进行实战演练，巩固所学知识！
-                    </p>
+
+                    <!-- 上下章导航 -->
+                    {% if prev_material or next_material %}
+                    <nav class="chapter-nav">
+                        {% if prev_material %}
+                        <a href="{% url 'learning:detail' prev_material.id %}" class="nav-card prev">
+                            <span class="nav-label">← 上一章</span>
+                            <div class="nav-title">{{ prev_material.title }}</div>
+                        </a>
+                        {% else %}
+                        <div></div>
+                        {% endif %}
+
+                        {% if next_material %}
+                        <a href="{% url 'learning:detail' next_material.id %}" class="nav-card next">
+                            <span class="nav-label">下一章 →</span>
+                            <div class="nav-title">{{ next_material.title }}</div>
+                        </a>
+                        {% endif %}
+                    </nav>
+                    {% endif %}
+
                 </footer>
+
             </article>
-
-            <!-- 前后章节导航 -->
-            <div class="chapter-nav">
-                {% if prev_material %}
-                <a href="{% url 'learning:detail' prev_material.id %}" 
-                   class="nav-card prev text-decoration-none">
-                    <span class="nav-label">← 上一章</span>
-                    <div class="nav-title">{{ prev_material.title }}</div>
-                </a>
-                {% endif %}
-                
-                {% if next_material %}
-                <a href="{% url 'learning:detail' next_material.id %}" 
-                   class="nav-card next text-decoration-none">
-                    <span class="nav-label">下一章 →</span>
-                    <div class="nav-title">{{ next_material.title }}</div>
-                </a>
-                {% endif %}
-            </div>
-
         </main>
+
     </div>
 </div>
 
-<!-- 右下角固定：返回顶部按钮 -->
-<button class="back-to-top-btn" id="backToTopBtn"
-        title="返回顶部" style="display: none;">
-    <svg class="back-to-top-icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
-        <path d="M513 103.7c-226.1 0-409.4 183.3-409.4 409.4S286.9 922.6 513 922.6s409.4-183.3 409.4-409.4S739.1 103.7 513 103.7z m153.5 364.7c-5.2 5.3-12.1 7.9-19 7.9s-13.8-2.6-19-7.9L545.1 385c0 0.4 0.1 0.7 0.1 1.1V705c0 11.1-5.7 20.9-14.4 26.6-4.7 4.2-10.9 6.7-17.7 6.7-6.8 0-13-2.5-17.7-6.7-8.7-5.7-14.4-15.5-14.4-26.6V386.1c0-0.4 0-0.7 0.1-1.1l-83.4 83.4c-10.5 10.5-27.5 10.5-38 0s-10.5-27.5 0-38L494 295.9c10.5-10.5 27.5-10.5 38 0l134.5 134.5c10.5 10.4 10.5 27.5 0 38z" fill="currentColor"/>
-    </svg>
+<!-- 返回顶部按钮 -->
+<button class="back-to-top-btn" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部">
+    ↑
 </button>
 
-<!-- 平滑滚动脚本 -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // 为所有目录链接添加平滑滚动和点击跳转功能
-    document.querySelectorAll('.toc-item').forEach(function(link) {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // 获取目标锚点ID
-            const targetId = this.getAttribute('href').substring(1);
-            
-            if (!targetId) return;
-            
-            // 查找目标元素（通过id属性）
-            let targetElement = document.getElementById(targetId);
-            
-            // 如果通过id没找到，尝试通过标题文本匹配
-            if (!targetElement) {
-                const linkText = this.textContent.trim();
-                targetElement = Array.from(document.querySelectorAll('.article-body h2, .article-body h3'))
-                    .find(h => h.textContent.trim() === linkText || 
-                              h.textContent.trim().includes(linkText));
-            }
-            
-            if (targetElement) {
-                // 计算目标位置（考虑固定头部偏移）
-                const headerOffset = 100;
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-
-                // 执行平滑滚动
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-
-                // 高亮当前激活的目录项
-                highlightActiveTocItem(this);
-                
-                // 更新浏览器URL（不触发页面刷新）
-                history.pushState(null, null, '#' + targetId);
-            } else {
-                console.warn('未找到目标元素:', targetId);
-            }
-        });
-        
-        // 鼠标悬停效果提示
-        link.addEventListener('mouseenter', function() {
-            this.style.cursor = 'pointer';
-        });
-    });
-
-    /**
-     * 高亮当前激活的目录项
-     * @param {HTMLElement} activeItem - 当前激活的目录项元素
-     */
-    function highlightActiveTocItem(activeItem) {
-        // 移除所有目录项的高亮样式
-        document.querySelectorAll('.toc-item').forEach(function(item) {
-            item.style.backgroundColor = 'transparent';
-            item.style.fontWeight = 'normal';
-            item.style.color = '';
-        });
-        
-        // 为当前项添加高亮样式
-        if (activeItem) {
-            activeItem.style.backgroundColor = 'rgba(0, 164, 244, 0.1)';
-            activeItem.style.fontWeight = '600';
-            activeItem.style.color = 'rgb(0, 164, 244)';
-        }
-    }
-
-    // 滚动时自动高亮当前章节（Intersection Observer API实现，性能更好）
-    const headings = document.querySelectorAll('.article-body h2[id], .article-body h3[id]');
+// ============================================
+// 目录折叠/展开功能
+// ============================================
+function toggleTOC() {
+    const sidebar = document.getElementById('sidebarToc');
+    const expandFab = document.getElementById('expandFab');
     
-    if (headings.length > 0 && 'IntersectionObserver' in window) {
-        // 使用 Intersection Observer 监听标题进入视口
-        const observerOptions = {
-            root: null,           // 视口作为根
-            rootMargin: '-100px 0px -70% 0px',  // 上方偏移100px，下方留30%空间
-            threshold: 0          // 只要部分可见就触发
-        };
-        
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(function(entry) {
-                if (entry.isIntersecting) {
-                    const headingId = entry.target.getAttribute('id');
-                    if (headingId) {
-                        // 查找对应的目录项并高亮
-                        const tocLink = document.querySelector(`.toc-item[href="#${headingId}"]`);
-                        if (tocLink) {
-                            highlightActiveTocItem(tocLink);
-                        }
-                    }
-                }
-            });
-        }, observerOptions);
-        
-        // 开始观察所有带id的标题
-        headings.forEach(function(heading) {
-            observer.observe(heading);
-        });
+    sidebar.classList.toggle('collapsed');
+    
+    if (sidebar.classList.contains('collapsed')) {
+        expandFab.style.display = 'flex';
     } else {
-        // 降级方案：使用scroll事件（兼容旧浏览器）
-        window.addEventListener('scroll', function() {
-            let currentHeading = null;
-            const scrollTop = window.pageYOffset;
-            
-            headings.forEach(function(heading) {
-                const rect = heading.getBoundingClientRect();
-                // 当标题进入视口上方150px范围内时认为是当前标题
-                if (rect.top <= 150) {
-                    currentHeading = heading;
-                }
-            });
-            
-            if (currentHeading) {
-                const headingId = currentHeading.getAttribute('id');
-                if (headingId) {
-                    const tocLink = document.querySelector(`.toc-item[href="#${headingId}"]`);
-                    if (tocLink) {
-                        highlightActiveTocItem(tocLink);
-                    }
-                }
-            }
-        }, { passive: true });  // passive提升滚动性能
+        expandFab.style.display = 'none';
     }
-    
-    // 页面加载时，如果URL中有hash，自动滚动到对应位置
-    if (window.location.hash) {
-        const hash = window.location.hash.substring(1);
-        setTimeout(function() {
-            const targetElement = document.getElementById(hash);
-            if (targetElement) {
-                const headerOffset = 100;
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: 'smooth'
-                });
-                
-                // 高亮对应目录项
-                const tocLink = document.querySelector(`.toc-item[href="#${hash}"]`);
-                if (tocLink) {
-                    highlightActiveTocItem(tocLink);
-                }
-            }
-        }, 300);  // 延迟300ms确保DOM完全渲染
+}
+
+// ============================================
+// 平滑滚动到指定章节
+// ============================================
+function scrollToSection(anchorId) {
+    const element = document.getElementById(anchorId);
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
-    
-    // ========== 目录折叠/展开功能 ==========
-    const sidebarToc = document.getElementById('sidebarToc');
-    const tocToggleBtn = document.getElementById('tocToggleBtn');
-    const tocExpandFab = document.getElementById('tocExpandFab');
-    
-    if (sidebarToc && tocToggleBtn) {
-        // 切换折叠状态
-        function toggleSidebar() {
-            sidebarToc.classList.toggle('collapsed');
-            
-            // 更新展开按钮显示状态
-            if (tocExpandFab) {
-                if (sidebarToc.classList.contains('collapsed')) {
-                    // 折叠了，显示展开按钮
-                    setTimeout(function() {
-                        tocExpandFab.style.display = 'flex';
-                        tocExpandFab.style.alignItems = 'center';
-                        tocExpandFab.style.justifyContent = 'center';
-                    }, 300);  // 等待折叠动画完成
-                } else {
-                    // 展开了，隐藏展开按钮
-                    tocExpandFab.style.display = 'none';
-                }
-            }
-        }
-        
-        // 点击折叠按钮
-        tocToggleBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            toggleSidebar();
-        });
-        
-        // 点击展开按钮（FAB）
-        if (tocExpandFab) {
-            tocExpandFab.addEventListener('click', function() {
-                toggleSidebar();
-            });
-        }
-        
-        // 双击侧边栏头部也可以切换（可选的便捷操作）
-        const tocHeader = sidebarToc.querySelector('.toc-header');
-        if (tocHeader) {
-            tocHeader.addEventListener('dblclick', function() {
-                toggleSidebar();
-            });
-        }
+}
+
+// ============================================
+// 返回顶部按钮显示/隐藏
+// ============================================
+const backToTopBtn = document.getElementById('backToTopBtn');
+
+window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+        backToTopBtn.classList.add('visible');
+    } else {
+        backToTopBtn.classList.remove('visible');
     }
-    
-    // ========== 返回顶部按钮功能 ==========
-    const backToTopBtn = document.getElementById('backToTopBtn');
-    
-    if (backToTopBtn) {
-        // 监听滚动事件，控制按钮显示/隐藏
-        let lastScrollY = window.scrollY;
-        let isScrolling = false;
-        
-        window.addEventListener('scroll', function() {
-            const currentScrollY = window.pageYOffset || document.documentElement.scrollTop;
-            
-            // 当滚动超过300px时显示按钮
-            if (currentScrollY > 300) {
-                backToTopBtn.classList.add('visible');
-                backToTopBtn.style.display = 'flex';  // 确保display为flex（用于布局）
-            } else {
-                backToTopBtn.classList.remove('visible');
-                // 动画结束后隐藏
-                setTimeout(function() {
-                    if (!backToTopBtn.classList.contains('visible')) {
-                        backToTopBtn.style.display = 'none';
-                    }
-                }, 300);
-            }
-            
-            lastScrollY = currentScrollY;
-        }, { passive: true });
-        
-        // 点击返回顶部
-        backToTopBtn.addEventListener('click', function() {
-            // 平滑滚动到顶部
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-            
-            // 添加点击动画效果
-            this.style.transform = 'translateY(-5px) scale(0.95)';
-            setTimeout(() => {
-                this.style.transform = '';
-            }, 150);
-        });
-        
-        // 初始化：检查初始滚动位置
-        if ((window.pageYOffset || document.documentElement.scrollTop) > 300) {
-            backToTopBtn.classList.add('visible');
-            backToTopBtn.style.display = 'flex';
-        }
+});
+
+function scrollToTop() {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// ============================================
+// 页面加载时的初始化
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.innerWidth <= 992) {
+        toggleTOC();
     }
 });
 </script>

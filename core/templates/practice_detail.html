@@ -1,77 +1,549 @@
 {% extends 'base.html' %}
 
-{% block title %}练习详情 - 提示词教学平台{% endblock %}
+{% block title %}{{ scenario.title }} - 实战练习{% endblock %}
+
+{% block extra_css %}
+<style>
+.practice-detail-container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #00A4F4;
+    text-decoration: none;
+    font-weight: 500;
+    margin-bottom: 25px;
+    transition: gap 0.3s ease;
+}
+
+.back-link:hover {
+    gap: 12px;
+}
+
+.scenario-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px;
+    padding: 35px;
+    color: white;
+    margin-bottom: 30px;
+}
+
+.scenario-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.scenario-header p {
+    font-size: 1.1rem;
+    opacity: 0.95;
+    line-height: 1.6;
+}
+
+.main-content {
+    display: grid;
+    grid-template-columns: 320px 1fr 380px;
+    gap: 25px;
+    align-items: start;
+}
+
+.left-column {
+    position: sticky;
+    top: 80px;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.topic-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-left: 4px solid #00A4F4;
+    transition: all 0.3s ease;
+}
+
+.topic-card:hover {
+    box-shadow: 0 4px 12px rgba(0,164,244,0.15);
+    transform: translateX(5px);
+}
+
+.topic-card.topic-2 {
+    border-left-color: #00D4AA;
+}
+
+.topic-number {
+    display: inline-block;
+    width: 28px;
+    height: 28px;
+    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    color: white;
+    border-radius: 50%;
+    text-align: center;
+    line-height: 28px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 10px;
+}
+
+.topic-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+.topic-description {
+    font-size: 0.9rem;
+    color: #666;
+    line-height: 1.6;
+}
+
+.center-column {
+    background: white;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+}
+
+.form-select,
+.form-textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #00A4F4;
+    box-shadow: 0 0 0 3px rgba(0,164,244,0.1);
+}
+
+.form-textarea {
+    min-height: 200px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.submit-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,164,244,0.3);
+}
+
+.submit-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.loading-overlay {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #00A4F4;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.right-column {
+    position: sticky;
+    top: 80px;
+}
+
+.results-section {
+    background: white;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    max-height: calc(100vh - 120px);
+    overflow-y: auto;
+}
+
+.result-item {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 18px;
+    margin-bottom: 15px;
+    border-left: 4px solid #00A4F4;
+}
+
+.result-item:last-child {
+    margin-bottom: 0;
+}
+
+.result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.result-score {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #00A4F4;
+}
+
+.result-time {
+    font-size: 0.85rem;
+    color: #999;
+}
+
+.result-topic {
+    font-size: 0.9rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.result-preview {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: #999;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+.current-result {
+    background: linear-gradient(135deg, #E3F2FD, #E0F7FA);
+    border-radius: 12px;
+    padding: 25px;
+    margin-top: 20px;
+    border: 2px solid #00A4F4;
+}
+
+.result-overview {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.overview-item {
+    text-align: center;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+}
+
+.overview-value {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #00A4F4;
+    margin-bottom: 5px;
+}
+
+.overview-label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.suggestions-box {
+    background: white;
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 15px;
+}
+
+.suggestions-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.suggestions-text {
+    font-size: 0.95rem;
+    color: #555;
+    line-height: 1.7;
+}
+
+@media (max-width: 1200px) {
+    .main-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .left-column,
+    .right-column {
+        position: static;
+        max-height: none;
+        overflow: visible;
+    }
+    
+    .topic-card {
+        display: inline-block;
+        width: calc(50% - 10px);
+        margin-right: 10px;
+        vertical-align: top;
+    }
+}
+
+@media (max-width: 768px) {
+    .scenario-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .practice-detail-container {
+        padding: 15px;
+    }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="{% url 'practice:history' %}">练习记录</a></li>
-                <li class="breadcrumb-item active">详情</li>
-            </ol>
-        </nav>
-        
-        <h2 class="mb-4">📋 练习详情</h2>
-        
-        <div class="card mb-4">
-            <div class="card-header text-white" style="background-color: rgb(0, 164, 244);">
-                <h5 class="mb-0">基本信息</h5>
+<div class="practice-detail-container">
+    <a href="{% url 'practice:practice' %}" class="back-link">
+        ← 返回场景列表
+    </a>
+
+    <div class="scenario-header">
+        <h1>
+            <span style="font-size: 2.5rem;">{{ scenario.icon }}</span>
+            {{ scenario.title }}
+        </h1>
+        <p>{{ scenario.description }}</p>
+    </div>
+
+    <div class="main-content">
+        <!-- 左侧：主题列表 -->
+        <div class="left-column">
+            <h3 class="section-title">📚 练习主题</h3>
+            
+            {% for topic in topics %}
+            <div class="topic-card {% if topic.topic_number == 2 %}topic-2{% endif %}">
+                <span class="topic-number">{{ topic.topic_number }}</span>
+                <h4 class="topic-title">{{ topic.title }}</h4>
+                <p class="topic-description">{{ topic.description }}</p>
+                
+                {% if topic.example_prompt %}
+                <details style="margin-top: 12px;">
+                    <summary style="cursor: pointer; color: #00A4F4; font-size: 0.9rem; font-weight: 500;">
+                        💡 查看示例提示词
+                    </summary>
+                    <p style="margin-top: 10px; padding: 12px; background: #f8f9fa; border-radius: 6px; font-size: 0.85rem; line-height: 1.6; color: #555;">
+                        {{ topic.example_prompt }}
+                    </p>
+                </details>
+                {% endif %}
             </div>
-            <div class="card-body">
-                <p><strong>练习时间：</strong>{{ record.created_at|date:"Y-m-d H:i:s" }}</p>
-                <p><strong>场景设置：</strong>{{ record.system_prompt }}</p>
-            </div>
+            {% endfor %}
         </div>
-        
-        <div class="row mb-4">
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header">
-                        <h5 class="mb-0">你的提示词</h5>
-                    </div>
-                    <div class="card-body">
-                        <pre class="bg-light p-3 rounded" style="white-space: pre-wrap; word-wrap: break-word;">{{ record.user_prompt }}</pre>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100">
-                    <div class="card-header text-white" style="background-color: rgb(0, 164, 244);">
-                        <h5 class="mb-0">综合得分：{{ record.overall_score }}</h5>
-                    </div>
-                    <div class="card-body">
-                        {% for dimension, score in record.scores.items %}
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between mb-1">
-                                <span><strong>{% if dimension == 'clarity' %}清晰度{% elif dimension == 'completeness' %}完整性{% elif dimension == 'structure' %}结构化{% elif dimension == 'creativity' %}创造性{% elif dimension == 'actionability' %}可执行性{% elif dimension == 'context_awareness' %}上下文感知{% else %}{{ dimension|title }}{% endif %}</strong></span>
-                                <span><strong>{{ score }}</strong>/100</span>
-                            </div>
-                            <div class="progress" style="height: 22px; border-radius: 11px; overflow: hidden;">
-                                <div class="progress-bar" 
-                                     role="progressbar" 
-                                     style="width: {{ score }}%; background-color: rgb(0, 164, 244); transition: width 0.8s ease;">
-                                    <span style="color: white; font-weight: 600;">{{ score }}</span>
-                                </div>
-                            </div>
-                        </div>
+
+        <!-- 中间：输入区域 -->
+        <div class="center-column">
+            <form method="post" id="practiceForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label class="form-label" for="topic">选择主题</label>
+                    <select name="topic" id="topic" class="form-select">
+                        <option value="">-- 请选择一个主题 --</option>
+                        {% for topic in topics %}
+                        <option value="{{ topic.id }}" {% if selected_topic_id == topic.id|stringformat:"s" %}selected{% endif %}>
+                            主题{{ topic.topic_number }}：{{ topic.title }}
+                        </option>
                         {% endfor %}
-                    </div>
+                    </select>
                 </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="user_prompt">输入你的提示词</label>
+                    <textarea 
+                        name="user_prompt" 
+                        id="user_prompt" 
+                        class="form-textarea" 
+                        placeholder="在这里输入你想要测试的提示词...&#10;&#10;💡 提示：&#10;- 明确描述你的目标和期望&#10;- 提供足够的上下文信息&#10;- 指定输出格式和要求&#10;- 设置约束条件和边界"
+                        required
+                    ></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    🚀 开始评估
+                </button>
+            </form>
+
+            <div id="loadingOverlay" style="display: none;" class="loading-overlay">
+                <div class="spinner"></div>
+                <h4 style="color: #333; margin-bottom: 10px;">🤔 正在深度分析...</h4>
+                <p style="color: #666;">AI正在从多个维度评估你的提示词</p>
+                <p style="color: #999; font-size: 0.9rem; margin-top: 5px;">预计需要 5-15 秒</p>
             </div>
+
+            {% if result %}
+            <div class="current-result" id="resultSection">
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #1a1a1a; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                    📊 本次评估结果
+                </h3>
+                
+                <div class="result-overview">
+                    <div class="overview-item">
+                        <div class="overview-value">{{ result.overall_score }}</div>
+                        <div class="overview-label">综合得分</div>
+                    </div>
+                    
+                    {% for dimension, score in result.scores.items %}
+                    <div class="overview-item">
+                        <div class="overview-value">{{ score }}</div>
+                        <div class="overview-label">
+                            {% if dimension == 'clarity' %}清晰度
+                            {% elif dimension == 'completeness' %}完整性
+                            {% elif dimension == 'structure' %}结构化
+                            {% elif dimension == 'creativity' %}创造性
+                            {% elif dimension == 'actionability' %}可执行性
+                            {% elif dimension == 'context_awareness' %}上下文感知
+                            {% else %}{{ dimension|title }}
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {% if result.strengths %}
+                <div class="suggestions-box">
+                    <div class="suggestions-title">✨ 优点</div>
+                    <p class="suggestions-text">{{ result.strengths }}</p>
+                </div>
+                {% endif %}
+
+                {% if result.suggestions %}
+                <div class="suggestions-box">
+                    <div class="suggestions-title">💡 改进建议</div>
+                    <p class="suggestions-text">{{ result.suggestions }}</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
-        
-        {% if record.suggestions %}
-        <div class="alert alert-info">
-            <h5>💡 改进建议</h5>
-            <p>{{ record.suggestions }}</p>
-        </div>
-        {% endif %}
-        
-        <div class="d-flex gap-2 mt-4">
-            <a href="{% url 'practice:practice' %}" class="btn btn-lg" style="background-color: rgb(0, 164, 244); color: white; border: none;">继续练习</a>
-            <a href="{% url 'practice:history' %}" class="btn btn-outline-secondary btn-lg">返回列表</a>
+
+        <!-- 右侧：历史记录 -->
+        <div class="right-column">
+            <h3 class="section-title">📜 练习历史</h3>
+            
+            <div class="results-section">
+                {% if records %}
+                    {% for record in records %}
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="result-score">{{ record.overall_score }}分</span>
+                            <span class="result-time">{{ record.created_at|date:"m-d H:i" }}</span>
+                        </div>
+                        
+                        {% if record.topic %}
+                        <div class="result-topic">📌 {{ record.topic.title }}</div>
+                        {% endif %}
+                        
+                        <div class="result-preview">{{ record.user_prompt|truncatechars:80 }}</div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">📝</div>
+                    <p>还没有练习记录</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px;">开始第一次练习吧！</p>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('practiceForm').addEventListener('submit', function(e) {
+    const form = this;
+    const btn = document.getElementById('submitBtn');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const resultSection = document.getElementById('resultSection');
+    
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>评估中...';
+    
+    setTimeout(() => {
+        form.style.display = 'none';
+        loadingOverlay.style.display = 'block';
+        if (resultSection) {
+            resultSection.style.display = 'none';
+        }
+    }, 300);
+});
+</script>
 {% endblock %}

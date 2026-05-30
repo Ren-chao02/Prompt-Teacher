@@ -1,0 +1,596 @@
+/**
+ * 自定义VitePress主题 - 提示词学习中心
+ * 设计风格：简约、现代、专业
+ */
+
+/* ========================================
+   1. 字体系统 (Typography System)
+   ======================================== */
+:root {
+  --vp-font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  --vp-font-family-mono: 'JetBrains Mono', 'Fira Code', Consolas, Monaco, 'Andale Mono', monospace;
+
+  /* 字号层级 (Type Scale) */
+  --text-xs: 0.75rem;      /* 12px */
+  --text-sm: 0.875rem;     /* 14px */
+  --text-base: 1rem;       /* 16px */
+  --text-lg: 1.125rem;     /* 18px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-4xl: 2.25rem;     /* 36px */
+
+  /* 行高 (Line Height) */
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  /* 字重 (Font Weight) */
+  --font-light: 300;
+  --font-regular: 400;
+  --font-medium: 500;
+  --font-semibold: 600;
+  --font-bold: 700;
+}
+
+/* ========================================
+   2. 颜色系统 (Color System)
+   ======================================== */
+:root {
+  /* 主色调 - 品牌蓝 */
+  --color-primary: #00A4F4;
+  --color-primary-dark: #0089CC;
+  --color-primary-light: #33B8F7;
+  
+  /* 中性色 (Neutral Colors) */
+  --color-gray-50: #F8FAFC;
+  --color-gray-100: #F1F5F9;
+  --color-gray-200: #E2E8F0;
+  --color-gray-300: #CBD5E1;
+  --color-gray-400: #94A3B8;
+  --color-gray-500: #64748B;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1E293B;
+  --color-gray-900: #0F172A;
+
+  /* 语义色 (Semantic Colors) */
+  --color-success: #10B981;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+  --color-info: #3B82F6;
+
+  /* 背景色 */
+  --bg-primary: #FFFFFF;
+  --bg-secondary: #F8FAFC;
+  --bg-tertiary: #F1F5F9;
+
+  /* 文字颜色 */
+  --text-primary: #1E293B;
+  --text-secondary: #475569;
+  --text-tertiary: #64748B;
+  --text-muted: #94A3B8;
+
+  /* 边框颜色 */
+  --border-color: #E2E8F0;
+  --border-color-light: #F1F5F9;
+}
+
+/* 暗色模式 (Dark Mode) */
+.dark {
+  --color-primary: #33B8F7;
+  --color-primary-dark: #00A4F4;
+  --color-primary-light: #66CEF9;
+
+  --bg-primary: #0F172A;
+  --bg-secondary: #1E293B;
+  --bg-tertiary: #334155;
+
+  --text-primary: #F1F5F9;
+  --text-secondary: #CBD5E1;
+  --text-tertiary: #94A3B8;
+  --text-muted: #64748B;
+
+  --border-color: #334155;
+  --border-color-light: #1E293B;
+}
+
+/* ========================================
+   3. 间距系统 (Spacing System)
+   ======================================== */
+:root {
+  /* 基础间距单位：4px */
+  --space-1: 0.25rem;    /* 4px */
+  --space-2: 0.5rem;     /* 8px */
+  --space-3: 0.75rem;    /* 12px */
+  --space-4: 1rem;       /* 16px */
+  --space-5: 1.25rem;    /* 20px */
+  --space-6: 1.5rem;     /* 24px */
+  --space-8: 2rem;       /* 32px */
+  --space-10: 2.5rem;    /* 40px */
+  --space-12: 3rem;      /* 48px */
+  --space-16: 4rem;      /* 64px */
+  --space-20: 5rem;      /* 80px */
+}
+
+/* ========================================
+   4. 圆角系统 (Border Radius)
+   ======================================== */
+:root {
+  --radius-sm: 0.25rem;   /* 4px */
+  --radius-md: 0.5rem;    /* 8px */
+  --radius-lg: 0.75rem;   /* 12px */
+  --radius-xl: 1rem;      /* 16px */
+  --radius-2xl: 1.5rem;   /* 24px */
+  --radius-full: 9999px;  /* 完全圆角 */
+}
+
+/* ========================================
+   5. 阴影系统 (Shadow System)
+   ======================================== */
+:root {
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* ========================================
+   6. 过渡动画 (Transitions)
+   ======================================== */
+:root {
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
+}
+
+/* ========================================
+   7. 全局样式覆盖 (Global Overrides)
+   ======================================== */
+
+/* 导入Inter字体 */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* 基础样式重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--vp-font-family-base);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background-color: var(--bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========================================
+   8. VitePress组件样式增强
+   ======================================== */
+
+/* 导航栏 (Navbar) */
+.VPNav {
+  border-bottom: 1px solid var(--border-color) !important;
+  backdrop-filter: blur(10px);
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.dark .VPNav {
+  background-color: rgba(15, 23, 42, 0.95) !important;
+}
+
+/* 侧边栏 (Sidebar) */
+.VPSidebar {
+  border-right: 1px solid var(--border-color) !important;
+  background-color: var(--bg-secondary) !important;
+}
+
+.VPSidebarItem .text {
+  font-weight: var(--font-medium) !important;
+  color: var(--text-secondary) !important;
+  transition: color var(--transition-fast) !important;
+}
+
+.VPSidebarItem:hover .text,
+.VPSidebarItem.active .text {
+  color: var(--color-primary) !important;
+}
+
+/* 主内容区 (Main Content) */
+.VPContent {
+  max-width: 100% !important;
+  padding: var(--space-8) var(--space-6) !important;
+}
+
+.VPDoc .container {
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+}
+
+/* 标题样式 (Headings) */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: var(--font-bold) !important;
+  line-height: var(--leading-tight) !important;
+  color: var(--text-primary) !important;
+  letter-spacing: -0.02em !important;
+}
+
+h1 {
+  font-size: var(--text-4xl) !important;
+  margin-bottom: var(--space-6) !important;
+}
+
+h2 {
+  font-size: var(--text-3xl) !important;
+  margin-top: var(--space-10) !important;
+  margin-bottom: var(--space-4) !important;
+  padding-bottom: var(--space-3) !important;
+  border-bottom: 2px solid var(--border-color) !important;
+}
+
+h3 {
+  font-size: var(--text-2xl) !important;
+  margin-top: var(--space-8) !important;
+  margin-bottom: var(--space-3) !important;
+}
+
+/* 段落文本 (Paragraphs) */
+p {
+  line-height: var(--leading-relaxed) !important;
+  color: var(--text-secondary) !important;
+  margin-bottom: var(--space-4) !important;
+}
+
+/* 链接样式 (Links) */
+a {
+  color: var(--color-primary) !important;
+  text-decoration: none !important;
+  transition: color var(--transition-fast), opacity var(--transition-fast) !important;
+  position: relative;
+}
+
+a:hover {
+  color: var(--color-primary-dark) !important;
+  opacity: 0.85 !important;
+}
+
+/* 代码块 (Code Blocks) */
+.vp-code,
+code {
+  font-family: var(--vp-font-family-mono) !important;
+  font-size: 0.9em !important;
+  padding: 0.2em 0.4em !important;
+  background-color: var(--bg-tertiary) !important;
+  border-radius: var(--radius-sm) !important;
+  border: 1px solid var(--border-color) !important;
+}
+
+pre code {
+  padding: var(--space-4) !important;
+  border-radius: var(--radius-lg) !important;
+  overflow-x: auto !important;
+}
+
+/* 引用块 (Blockquotes) */
+blockquote {
+  border-left: 4px solid var(--color-primary) !important;
+  padding: var(--space-4) var(--space-6) !important;
+  margin: var(--space-6) 0 !important;
+  background-color: var(--bg-secondary) !important;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+  font-style: italic !important;
+  color: var(--text-secondary) !important;
+}
+
+/* 列表 (Lists) */
+ul, ol {
+  padding-left: var(--space-6) !important;
+  margin-bottom: var(--space-4) !important;
+}
+
+li {
+  margin-bottom: var(--space-2) !important;
+  line-height: var(--leading-relaxed) !important;
+  color: var(--text-secondary) !important;
+}
+
+li::marker {
+  color: var(--color-primary) !important;
+}
+
+/* 表格 (Tables) */
+table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+  margin: var(--space-6) 0 !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+th, td {
+  padding: var(--space-3) var(--space-4) !important;
+  text-align: left !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+th {
+  background-color: var(--bg-secondary) !important;
+  font-weight: var(--font-semibold) !important;
+  color: var(--text-primary) !important;
+}
+
+td {
+  color: var(--text-secondary) !important;
+}
+
+tr:hover td {
+  background-color: var(--bg-tertiary) !important;
+}
+
+/* 按钮 (Buttons) */
+button,
+.VPButton {
+  font-family: var(--vp-font-family-base) !important;
+  font-weight: var(--font-medium) !important;
+  transition: all var(--transition-fast) !important;
+  cursor: pointer !important;
+}
+
+.VPButton.brand {
+  background-color: var(--color-primary) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: var(--radius-lg) !important;
+  padding: var(--space-3) var(--space-6) !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.VPButton.brand:hover {
+  background-color: var(--color-primary-dark) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: var(--shadow-md) !important;
+}
+
+/* 提示框 (Custom Containers) */
+.custom-block {
+  border-left-width: 4px !important;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0 !important;
+  padding: var(--space-4) var(--space-5) !important;
+  margin: var(--space-6) 0 !important;
+  box-shadow: var(--shadow-sm) !important;
+}
+
+.custom-block.tip {
+  border-color: var(--color-success) !important;
+  background-color: rgba(16, 185, 129, 0.05) !important;
+}
+
+.custom-block.warning {
+  border-color: var(--color-warning) !important;
+  background-color: rgba(245, 158, 11, 0.05) !important;
+}
+
+.custom-block.danger {
+  border-color: var(--color-error) !important;
+  background-color: rgba(239, 68, 68, 0.05) !important;
+}
+
+.custom-block.info {
+  border-color: var(--color-info) !important;
+  background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+/* ========================================
+   9. 学习中心特有组件样式
+   ======================================== */
+
+/* 课程卡片网格 */
+.learning-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: var(--space-6);
+  margin: var(--space-8) 0;
+}
+
+/* 课程卡片 */
+.learning-card {
+  background-color: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  transition: all var(--transition-normal) !important;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.learning-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--transition-normal);
+}
+
+.learning-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--color-primary-light);
+}
+
+.learning-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* 分类标签 */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  background-color: rgba(0, 164, 244, 0.1);
+  color: var(--color-primary);
+  margin-bottom: var(--space-3);
+}
+
+/* 进度指示器 */
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  background-color: var(--bg-tertiary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  margin: var(--space-3) 0;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+  border-radius: var(--radius-full);
+  transition: width var(--transition-slow);
+}
+
+/* 阅读时间标签 */
+.reading-time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+/* ========================================
+   10. 响应式设计 (Responsive Design)
+   ======================================== */
+
+@media (max-width: 768px) {
+  :root {
+    --text-4xl: 1.875rem;
+    --text-3xl: 1.5rem;
+    --text-2xl: 1.25rem;
+  }
+
+  .learning-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .VPContent {
+    padding: var(--space-4) var(--space-4) !important;
+  }
+
+  .VPDoc .container {
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --text-4xl: 1.5rem;
+    --text-3xl: 1.25rem;
+  }
+
+  .learning-card {
+    padding: var(--space-4);
+  }
+}
+
+/* ========================================
+   11. 动画效果 (Animations)
+   ======================================== */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.slide-in-left {
+  animation: slideInLeft 0.6s ease-out forwards;
+}
+
+/* 减少动画偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ========================================
+   12. 可访问性增强 (Accessibility)
+   ======================================== */
+
+/* 焦点状态 */
+*:focus-visible {
+  outline: 2px solid var(--color-primary) !important;
+  outline-offset: 2px !important;
+}
+
+/* 跳过链接 */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: var(--color-primary);
+  color: white;
+  padding: var(--space-2) var(--space-4);
+  z-index: 9999;
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* 高对比度模式支持 */
+@media (forced-colors: active) {
+  .learning-card {
+    border: 2px solid currentColor;
+  }
+
+  .category-badge {
+    border: 1px solid currentColor;
+  }
+}
