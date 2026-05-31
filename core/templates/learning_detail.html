@@ -557,37 +557,134 @@
     }
 }
 
-/* ========== 返回顶部按钮样式 ========== */
+/* ========== 返回顶部按钮样式（UI/UX Pro Max 设计）========== */
 .back-to-top-btn {
     position: fixed;
-    bottom: 40px;
-    right: 40px;
-    width: 56px;
-    height: 56px;
-    border-radius: 28px;
+    bottom: 32px;
+    right: 32px;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
     background: var(--color-primary-gradient);
-    border: none;
+    border: 2px solid rgba(255, 255, 255, 0.3);
     color: white;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 4px 20px rgba(0, 164, 244, 0.4);
-    z-index: 999;
-    transition: all var(--transition-slow);
+    box-shadow:
+        0 4px 12px rgba(0, 164, 244, 0.3),
+        0 2px 4px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    z-index: 1000;
     opacity: 0;
     visibility: hidden;
-    transform: translateY(20px);
+    transform: translateY(20px) scale(0.9);
+    transition:
+        transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+        opacity 0.25s ease-out,
+        visibility 0.25s ease-out,
+        box-shadow 0.25s ease-out,
+        background 0.25s ease-out;
+    will-change: transform, opacity;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .back-to-top-btn.visible {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
 }
 
 .back-to-top-btn:hover {
-    transform: translateY(-5px);
+    transform: translateY(-4px) scale(1.05);
+    box-shadow:
+        0 8px 24px rgba(0, 164, 244, 0.45),
+        0 4px 8px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg, #00b4ff 0%, #0088cc 100%);
+}
+
+.back-to-top-btn:active {
+    transform: translateY(-2px) scale(0.95);
+    transition-duration: 0.1s;
+}
+
+.back-to-top-btn:focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 3px;
+}
+
+.back-to-top-btn svg {
+    width: 24px;
+    height: 24px;
+    stroke-width: 2.5;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.15));
+}
+
+.back-to-top-btn:hover svg {
+    transform: translateY(-2px);
+}
+
+/* 脉冲动画 - 引导用户注意 */
+@keyframes pulse-ring {
+    0% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
+.back-to-top-btn.visible::before {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+    z-index: -1;
+    animation: pulse-ring 2s ease-out infinite;
+    pointer-events: none;
+}
+
+/* 减少动画偏好支持 */
+@media (prefers-reduced-motion: reduce) {
+    .back-to-top-btn {
+        transition: opacity 0.15s ease, visibility 0.15s ease;
+        transform: none !important;
+    }
+
+    .back-to-top-btn.visible {
+        transform: none !important;
+    }
+
+    .back-to-top-btn:hover {
+        transform: none !important;
+    }
+
+    .back-to-top-btn::before {
+        animation: none;
+    }
+
+    .back-to-top-btn svg {
+        transition: none;
+    }
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .back-to-top-btn {
+        bottom: 24px;
+        right: 24px;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+    }
 }
 </style>
 {% endblock %}
@@ -698,9 +795,11 @@
     </div>
 </div>
 
-<!-- 返回顶部按钮 -->
-<button class="back-to-top-btn" id="backToTopBtn" onclick="scrollToTop()" title="返回顶部">
-    ↑
+<!-- 返回顶部按钮（UI/UX Pro Max 设计） -->
+<button class="back-to-top-btn" id="backToTopBtn" onclick="scrollToTop()" aria-label="返回顶部" title="返回顶部">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+    </svg>
 </button>
 
 <script>
@@ -731,23 +830,41 @@ function scrollToSection(anchorId) {
 }
 
 // ============================================
-// 返回顶部按钮显示/隐藏
+// 返回顶部按钮显示/隐藏（UI/UX Pro Max 优化版）
 // ============================================
 const backToTopBtn = document.getElementById('backToTopBtn');
+let lastScrollY = 0;
+let ticking = false;
 
-window.addEventListener('scroll', () => {
-    if (window.scrollY > 400) {
+const SCROLL_THRESHOLD = 300;
+
+function updateBackToTopButton() {
+    const currentScrollY = window.scrollY;
+
+    if (currentScrollY > SCROLL_THRESHOLD && !backToTopBtn.classList.contains('visible')) {
         backToTopBtn.classList.add('visible');
-    } else {
+    } else if (currentScrollY <= SCROLL_THRESHOLD && backToTopBtn.classList.contains('visible')) {
         backToTopBtn.classList.remove('visible');
     }
-});
+
+    lastScrollY = currentScrollY;
+    ticking = false;
+}
+
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(updateBackToTopButton);
+        ticking = true;
+    }
+}, { passive: true });
 
 function scrollToTop() {
     window.scrollTo({
         top: 0,
         behavior: 'smooth'
     });
+
+    backToTopBtn.focus();
 }
 
 // ============================================
