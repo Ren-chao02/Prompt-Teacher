@@ -19,6 +19,8 @@ urlpatterns = [
     path('api/v1/', include('users.api.urls')),
     path('api/v1/learning/', include('learning.api.urls')),
     path('api/v1/practice/', include('practice.api.urls')),
+    path('api/v1/analytics/', include('analytics.api.urls')),  # 数据分析模块
+    path('api/v1/notifications/', include('notifications.api.urls')),  # 通知系统模块
     
     # API 文档 (Swagger)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),

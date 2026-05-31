@@ -35,7 +35,24 @@ service.interceptors.response.use(
     }
     
     if (showError) {
-      ElMessage.error(res.message || '请求失败')
+      // 只显示标准的、用户友好的错误消息
+      const friendlyMessages = [
+        '请求失败',
+        '登录已过期',
+        '没有权限访问',
+        '资源不存在',
+        '数据验证失败',
+        '服务器错误'
+      ]
+      
+      const message = res.message || '请求失败'
+      
+      // 过滤掉非标准或过长的错误消息
+      if (message.length < 100 && !/[\x{4e00}-\x{9fa5}]/.test(message) || friendlyMessages.some(m => message.includes(m))) {
+        ElMessage.error(message)
+      } else {
+        ElMessage.error('操作失败，请稍后重试')
+      }
     }
     
     if (res.code === 401) {
@@ -68,16 +85,20 @@ service.interceptors.response.use(
             break
           case 422:
             if (data?.detail) {
-              ElMessage.error(typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail))
+              const detail = typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)
+              // 只显示简短的验证错误
+              ElMessage.error(detail.length > 50 ? '数据验证失败' : detail)
             } else {
               ElMessage.error('数据验证失败')
             }
             break
           case 500:
-            ElMessage.error('服务器内部错误')
+            ElMessage.error('服务器内部错误，请稍后重试')
             break
           default:
-            ElMessage.error(data?.message || data?.detail || `请求错误 (${status})`)
+            // 对于其他错误，使用通用消息
+            const errorMsg = data?.message || data?.detail || `请求错误 (${status})`
+            ElMessage.error(errorMsg.length > 50 ? '操作失败，请稍后重试' : errorMsg)
         }
       }
       

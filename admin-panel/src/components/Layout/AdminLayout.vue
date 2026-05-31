@@ -2,7 +2,7 @@
   <el-container class="layout-container">
     <!-- 侧边栏 -->
     <el-aside :width="isCollapse ? '64px' : '220px'" class="aside">
-      <div class="logo" @click="$router.push('/dashboard')">
+      <div class="logo" @click="$router.push('/admin/dashboard')">
         <h1 v-if="!isCollapse">Prompt Teacher</h1>
         <span v-else>PT</span>
       </div>
@@ -67,7 +67,7 @@
 
           <!-- 动态面包屑 -->
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/admin/dashboard' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbs"
               :key="item.path"
@@ -85,6 +85,9 @@
               <FullScreen />
             </el-icon>
           </el-tooltip>
+
+          <!-- 通知铃铛 -->
+          <NotificationBell />
 
           <!-- 用户下拉菜单 -->
           <el-dropdown trigger="click" @command="handleCommand">
@@ -154,6 +157,7 @@ import {
   SwitchButton,
   Document
 } from '@element-plus/icons-vue'
+import NotificationBell from '@/components/NotificationBell.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -184,78 +188,91 @@ const isAdminOrTeacher = computed(() => authStore.isAdminOrTeacher)
 
 const menuList = ref([
   {
-    path: '/dashboard',
+    path: '/admin/dashboard',
     title: '仪表盘',
     icon: 'Odometer',
     roles: ['admin', 'teacher', 'student']
   },
   {
-    path: '/learning',
+    path: '/admin/learning',
     title: '学习管理',
     icon: 'Reading',
     roles: ['admin', 'teacher', 'student'],
     children: [
       {
-        path: '/learning/list',
+        path: '/admin/learning/list',
         title: '内容列表',
         icon: 'Document',
         roles: ['admin', 'teacher', 'student']
       },
       {
-        path: '/learning/create',
+        path: '/admin/learning/create',
         title: '创建内容',
         icon: 'EditPen',
         roles: ['admin', 'teacher']
-      },
-      {
-        path: '/learning/detail/:id',
-        title: '内容详情',
-        icon: 'View',
-        roles: ['admin', 'teacher', 'student'],
-        hidden: true
       }
     ]
   },
   {
-    path: '/practice',
+    path: '/admin/practice',
     title: '练习系统',
     icon: 'Aim',
     roles: ['admin', 'teacher'],
     children: [
       {
-        path: '/practice/scenarios',
+        path: '/admin/practice/scenarios',
         title: '场景管理',
         icon: 'Grid',
         roles: ['admin', 'teacher']
       },
       {
-        path: '/practice/topics',
+        path: '/admin/practice/topics',
         title: '主题管理',
         icon: 'List',
         roles: ['admin', 'teacher']
       },
       {
-        path: '/practice/records',
+        path: '/admin/practice/records',
         title: '练习记录',
         icon: 'Tickets',
-        roles: ['admin', 'teacher']
+        roles: ['admin', 'teacher', 'student']
       }
     ]
   },
   {
-    path: '/statistics',
+    path: '/admin/analytics',
     title: '数据分析',
     icon: 'DataAnalysis',
-    roles: ['admin']
+    roles: ['admin', 'teacher', 'student'],
+    children: [
+      {
+        path: '/admin/analytics/overview',
+        title: '数据概览',
+        icon: 'Odometer',
+        roles: ['admin', 'teacher', 'student']
+      },
+      {
+        path: '/admin/analytics/learning',
+        title: '学习进度',
+        icon: 'TrendCharts',
+        roles: ['admin', 'teacher', 'student']
+      },
+      {
+        path: '/admin/analytics/practice',
+        title: '练习统计',
+        icon: 'Histogram',
+        roles: ['admin', 'teacher', 'student']
+      }
+    ]
   },
   {
-    path: '/users/list',
+    path: '/admin/users/list',
     title: '用户管理',
     icon: 'UserFilled',
     roles: ['admin']
   },
   {
-    path: '/profile',
+    path: '/admin/profile',
     title: '个人中心',
     icon: 'User',
     roles: ['admin', 'teacher', 'student']
@@ -343,12 +360,25 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   color: #fff;
-  font-size: 20px;
+  font-size: 18px;
   font-weight: bold;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   cursor: pointer;
   transition: all 0.3s;
   flex-shrink: 0;
+  padding: 0 16px;
+  white-space: nowrap;
+  overflow: visible;
+}
+
+.logo h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 180px;
 }
 
 .logo:hover {
@@ -362,6 +392,19 @@ onMounted(() => {
 
 .el-menu {
   border-right: none;
+}
+
+/* 修复菜单项文字显示 */
+.el-menu-item,
+.el-sub-menu__title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.el-sub-menu .el-menu-item {
+  padding-left: 50px !important;
+  min-width: auto;
 }
 
 .header {

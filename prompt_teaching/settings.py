@@ -38,6 +38,8 @@ INSTALLED_APPS = [
     'practice',
     'learning',
     'core',
+    'analytics',  # 数据分析模块
+    'notifications',  # 通知系统模块
     'markdownify',
     # REST Framework
     'rest_framework',
@@ -45,6 +47,8 @@ INSTALLED_APPS = [
     'corsheaders',
     # 第三方库
     'django_filters',
+    # WebSocket (Django Channels)
+    'channels',
     # API 文档
     'drf_spectacular',
 ]
@@ -79,6 +83,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'prompt_teaching.wsgi.application'
+
+# Django Channels (WebSocket) 配置
+ASGI_APPLICATION = 'prompt_teaching.asgi.application'
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
+}
 
 if USE_POSTGRES:
     DATABASES = {

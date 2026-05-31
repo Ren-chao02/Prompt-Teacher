@@ -1,5 +1,16 @@
 <template>
   <div class="dashboard" v-loading="loading">
+    <!-- 错误提示 -->
+    <el-alert
+      v-if="errorMessage"
+      :title="errorMessage"
+      type="error"
+      show-icon
+      closable
+      @close="errorMessage = ''"
+      style="margin-bottom: 20px;"
+    />
+
     <!-- 统计卡片 -->
     <el-row :gutter="20" class="stat-cards">
       <el-col :span="6">
@@ -240,6 +251,7 @@ const authStore = useAuthStore()
 
 const loading = ref(false)
 const showWelcome = ref(true)
+const errorMessage = ref('')
 
 const stats = reactive({
   totalUsers: 0,
@@ -318,8 +330,27 @@ async function loadDashboardData() {
     
   } catch (error) {
     console.error('加载 Dashboard 数据失败:', error)
+    
+    // 设置用户友好的错误信息
+    if (error?.response?.status === 401) {
+      errorMessage.value = '登录已过期，请重新登录'
+    } else if (error?.response?.status === 403) {
+      errorMessage.value = '没有权限访问此页面'
+    } else if (error?.message === 'Network Error' || !navigator.onLine) {
+      errorMessage.value = '网络连接失败，请检查网络连接'
+    } else if (error?.code === 'ECONNABORTED') {
+      errorMessage.value = '请求超时，请稍后重试'
+    } else {
+      errorMessage.value = error?.message || '加载数据失败，请刷新页面重试'
+    }
+    
     setDefaultStats()
     generateMockActivities()
+    
+    // 5秒后自动清除错误提示
+    setTimeout(() => {
+      errorMessage.value = ''
+    }, 5000)
   } finally {
     loading.value = false
     

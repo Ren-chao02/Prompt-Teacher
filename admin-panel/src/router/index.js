@@ -113,6 +113,46 @@ const routes = [
           icon: 'DocumentChecked',
           roles: ['admin', 'teacher', 'student']
         }
+      },
+      {
+        path: 'analytics/overview',
+        name: 'AnalyticsOverview',
+        component: () => import('@/views/analytics/Overview.vue'),
+        meta: {
+          title: '数据分析概览',
+          icon: 'DataAnalysis',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'analytics/learning',
+        name: 'LearningProgress',
+        component: () => import('@/views/analytics/LearningProgress.vue'),
+        meta: {
+          title: '学习进度分析',
+          icon: 'TrendCharts',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'analytics/practice',
+        name: 'PracticeStatistics',
+        component: () => import('@/views/analytics/PracticeStatistics.vue'),
+        meta: {
+          title: '练习成绩统计',
+          icon: 'Histogram',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'notifications',
+        name: 'NotificationCenter',
+        component: () => import('@/views/NotificationCenter.vue'),
+        meta: {
+          title: '消息通知',
+          icon: 'Bell',
+          roles: ['admin', 'teacher', 'student']
+        }
       }
     ]
   },

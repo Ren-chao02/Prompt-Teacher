@@ -33,11 +33,16 @@ class PracticeScenarioDetailSerializer(serializers.ModelSerializer):
     
     def get_author_info(self, obj):
         if obj.author:
+            try:
+                avatar_url = obj.author.avatar.url if obj.author.avatar else None
+            except (ValueError, AttributeError):
+                avatar_url = None
+
             return {
                 'id': obj.author.id,
                 'username': obj.author.username,
                 'role': getattr(obj.author, 'role', ''),
-                'avatar': getattr(obj.author, 'avatar', None)
+                'avatar': avatar_url
             }
         return None
     
@@ -104,7 +109,7 @@ class PracticeTopicListSerializer(serializers.ModelSerializer):
         model = PracticeTopic
         fields = [
             'id', 'scenario', 'scenario_title', 'topic_number',
-            'title', 'description', 'topic_type',
+            'title', 'description', 'topic_type', 'difficulty',
             'max_score', 'time_limit_minutes',
             'order', 'is_active', 'created_at', 'updated_at'
         ]
@@ -237,12 +242,17 @@ class PracticeRecordDetailSerializer(serializers.ModelSerializer):
     
     def get_user_info(self, obj):
         user = obj.user
+        try:
+            avatar_url = user.avatar.url if user.avatar else None
+        except (ValueError, AttributeError):
+            avatar_url = None
+
         return {
             'id': user.id,
             'username': user.username,
             'full_name': f"{getattr(user, 'first_name', '')} {getattr(user, 'last_name', '')}".strip(),
             'role': getattr(user, 'role', ''),
-            'avatar': getattr(user, 'avatar', None),
+            'avatar': avatar_url,
             'student_id': getattr(user, 'student_id', None)
         }
     
