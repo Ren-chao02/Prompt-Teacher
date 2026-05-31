@@ -1,0 +1,182 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/store/modules/auth'
+
+const routes = [
+  {
+    path: '/admin/login',
+    name: 'Login',
+    component: () => import('@/views/login/index.vue'),
+    meta: { requiresAuth: false }
+  },
+  {
+    path: '/admin',
+    component: () => import('@/components/Layout/AdminLayout.vue'),
+    meta: { requiresAuth: true },
+    redirect: '/admin/dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        name: 'Dashboard',
+        component: () => import('@/views/dashboard/index.vue'),
+        meta: {
+          title: '仪表盘',
+          icon: 'Odometer',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'users/list',
+        name: 'UserList',
+        component: () => import('@/views/user/list.vue'),
+        meta: {
+          title: '用户管理',
+          icon: 'UserFilled',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'profile',
+        name: 'Profile',
+        component: () => import('@/views/user/profile.vue'),
+        meta: {
+          title: '个人中心',
+          icon: 'User',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'learning/list',
+        name: 'LearningList',
+        component: () => import('@/views/learning/list.vue'),
+        meta: {
+          title: '学习内容列表',
+          icon: 'Reading',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'learning/create',
+        name: 'LearningCreate',
+        component: () => import('@/views/learning/edit.vue'),
+        meta: {
+          title: '创建学习内容',
+          icon: 'EditPen',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
+        path: 'learning/edit/:id',
+        name: 'LearningEdit',
+        component: () => import('@/views/learning/edit.vue'),
+        meta: {
+          title: '编辑学习内容',
+          icon: 'EditPen',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
+        path: 'learning/detail/:id',
+        name: 'LearningDetail',
+        component: () => import('@/views/learning/detail.vue'),
+        meta: {
+          title: '内容详情',
+          icon: 'Document',
+          roles: ['admin', 'teacher', 'student']
+        }
+      },
+      {
+        path: 'practice/scenarios',
+        name: 'PracticeScenarios',
+        component: () => import('@/views/practice/scenarios.vue'),
+        meta: {
+          title: '练习场景',
+          icon: 'Aim',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
+        path: 'practice/topics',
+        name: 'PracticeTopics',
+        component: () => import('@/views/practice/topics.vue'),
+        meta: {
+          title: '主题管理',
+          icon: 'List',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
+        path: 'practice/records',
+        name: 'PracticeRecords',
+        component: () => import('@/views/practice/records.vue'),
+        meta: {
+          title: '练习记录',
+          icon: 'DocumentChecked',
+          roles: ['admin', 'teacher', 'student']
+        }
+      }
+    ]
+  },
+  {
+    path: '/admin/403',
+    name: 'Forbidden',
+    component: () => import('@/views/error/403.vue')
+  },
+  {
+    path: '/admin/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/error/404.vue')
+  },
+  {
+    path: '/',
+    redirect: '/admin'
+  },
+  {
+    path: '/login',
+    redirect: '/admin/login'
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes
+})
+
+let isInitialized = false
+const pendingNavigation = null
+
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
+  
+  if (!isInitialized && authStore.token && !authStore.user) {
+    try {
+      await authStore.fetchUserInfo()
+      console.log('✅ 路由守卫：用户信息已恢复')
+    } catch (error) {
+      console.error('❌ 路由守卫：恢复用户信息失败:', error)
+      authStore.logout()
+      
+      if (to.path !== '/admin/login') {
+        next({ path: '/admin/login', query: { redirect: to.fullPath } })
+        return
+      }
+    }
+    
+    isInitialized = true
+  }
+  
+  if (to.meta.requiresAuth && !authStore.isLoggedIn) {
+    next({ path: '/admin/login', query: { redirect: to.fullPath } })
+    return
+  }
+  
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    if (!authStore.role || !to.meta.roles.includes(authStore.role)) {
+      next('/admin/403')
+      return
+    }
+  }
+  
+  next()
+})
+
+export default router

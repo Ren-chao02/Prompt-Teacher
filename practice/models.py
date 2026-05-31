@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 
 
 class PracticeScenario(models.Model):
@@ -18,33 +18,127 @@ class PracticeScenario(models.Model):
         ('creative_writing', '创意写作与内容创作'),
     ]
 
+    DIFFICULTY_CHOICES = [
+        ('beginner', '初级'),
+        ('intermediate', '中级'),
+        ('advanced', '高级')
+    ]
+
+    STATUS_CHOICES = [
+        ('draft', '草稿'),
+        ('published', '已发布'),
+        ('archived', '已下架')
+    ]
+
     scenario_id = models.CharField(max_length=50, unique=True, verbose_name='场景ID')
     title = models.CharField(max_length=100, verbose_name='场景标题')
     description = models.TextField(verbose_name='场景描述')
     icon = models.CharField(max_length=50, default='🎯', verbose_name='图标')
-    difficulty = models.CharField(max_length=20, choices=[('beginner', '初级'), ('intermediate', '中级'), ('advanced', '高级')], default='intermediate', verbose_name='难度')
-    order = models.IntegerField(default=0, verbose_name='排序')
+    cover_image = models.URLField(blank=True, null=True, verbose_name='封面图片')
+    
+    difficulty = models.CharField(
+        max_length=20,
+        choices=DIFFICULTY_CHOICES,
+        default='intermediate',
+        verbose_name='难度'
+    )
+    
+    status = models.CharField(
+        max_length=20,
+        choices=STATUS_CHOICES,
+        default='draft',
+        verbose_name='状态',
+        db_index=True
+    )
+    
+    order = models.IntegerField(default=0, verbose_name='排序权重')
     is_active = models.BooleanField(default=True, verbose_name='是否启用')
+    
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='created_scenarios',
+        verbose_name='创建者'
+    )
+
+    view_count = models.PositiveIntegerField(default=0, verbose_name='查看次数')
+    practice_count = models.PositiveIntegerField(default=0, verbose_name='练习次数')
+    avg_score = models.FloatField(default=0, verbose_name='平均分')
+
+    created_at = models.DateTimeField(auto_now_add=True, null=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, null=True, verbose_name='更新时间')
+    published_at = models.DateTimeField(null=True, blank=True, verbose_name='发布时间')
 
     class Meta:
-        ordering = ['order']
+        ordering = ['-order', '-created_at']
         verbose_name = '练习场景'
         verbose_name_plural = '练习场景'
 
     def __str__(self):
         return self.title
 
+    def increment_view(self):
+        self.view_count += 1
+        models.Model.save(self)
+
+    def increment_practice_count(self):
+        self.practice_count += 1
+        models.Model.save(self)
+
+    def publish(self):
+        from django.utils import timezone
+        self.status = 'published'
+        self.published_at = timezone.now()
+        self.is_active = True
+        self.save()
+
+    def archive(self):
+        self.status = 'archived'
+        self.is_active = False
+        self.save()
+
 
 class PracticeTopic(models.Model):
-    scenario = models.ForeignKey(PracticeScenario, on_delete=models.CASCADE, related_name='topics', verbose_name='所属场景')
-    topic_number = models.IntegerField(verbose_name='主题编号')  # 1 或 2
+    TOPIC_TYPE_CHOICES = [
+        ('standard', '标准题'),
+        ('challenge', '挑战题'),
+        ('bonus', '加分题')
+    ]
+
+    scenario = models.ForeignKey(
+        PracticeScenario,
+        on_delete=models.CASCADE,
+        related_name='topics',
+        verbose_name='所属场景'
+    )
+    
+    topic_number = models.IntegerField(verbose_name='主题编号')
     title = models.CharField(max_length=200, verbose_name='主题标题')
     description = models.TextField(verbose_name='主题描述')
+    
+    topic_type = models.CharField(
+        max_length=20,
+        choices=TOPIC_TYPE_CHOICES,
+        default='standard',
+        verbose_name='题目类型'
+    )
+    
     example_prompt = models.TextField(blank=True, verbose_name='示例提示词')
     evaluation_criteria = models.JSONField(default=dict, verbose_name='评估标准')
+    
+    max_score = models.IntegerField(default=100, verbose_name='满分')
+    time_limit_minutes = models.IntegerField(default=30, verbose_name='时间限制(分钟)')
+    
+    order = models.IntegerField(default=0, verbose_name='排序')
+    is_active = models.BooleanField(default=True, verbose_name='是否启用')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
 
     class Meta:
-        ordering = ['topic_number']
+        ordering = ['order', 'topic_number']
         unique_together = ['scenario', 'topic_number']
         verbose_name = '练习主题'
         verbose_name_plural = '练习主题'
@@ -54,9 +148,35 @@ class PracticeTopic(models.Model):
 
 
 class PracticeRecord(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='practice_records')
-    scenario = models.ForeignKey(PracticeScenario, on_delete=models.CASCADE, null=True, blank=True, verbose_name='练习场景')
-    topic = models.ForeignKey(PracticeTopic, on_delete=models.SET_NULL, null=True, blank=True, verbose_name='选择的主题')
+    SCORE_LEVEL_CHOICES = [
+        ('excellent', '优秀 (90-100)'),
+        ('good', '良好 (80-89)'),
+        ('average', '中等 (70-79)'),
+        ('needs_improvement', '待提高 (60-69)'),
+        ('poor', '较差 (<60)')
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='practice_records'
+    )
+    
+    scenario = models.ForeignKey(
+        PracticeScenario,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        verbose_name='练习场景'
+    )
+    
+    topic = models.ForeignKey(
+        PracticeTopic,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='选择的主题'
+    )
 
     user_prompt = models.TextField(verbose_name='用户提示词')
     system_prompt = models.TextField(verbose_name='系统提示词(场景)', default='')
@@ -66,13 +186,29 @@ class PracticeRecord(models.Model):
     suggestions = models.TextField(verbose_name='修改建议', blank=True)
     overall_score = models.IntegerField(verbose_name='综合得分', default=0)
     
+    score_level = models.CharField(
+        max_length=20,
+        choices=SCORE_LEVEL_CHOICES,
+        default='average',
+        verbose_name='成绩等级'
+    )
+    
     duration_seconds = models.IntegerField(default=0, verbose_name='练习时长(秒)')
+    
+    is_completed = models.BooleanField(default=False, verbose_name='是否完成')
+    feedback = models.TextField(blank=True, verbose_name='学生反馈')
     
     created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
     updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+    completed_at = models.DateTimeField(null=True, blank=True, verbose_name='完成时间')
 
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', '-created_at']),
+            models.Index(fields=['scenario', '-overall_score']),
+            models.Index(fields=['score_level']),
+        ]
         verbose_name = '练习记录'
         verbose_name_plural = '练习记录'
 
@@ -98,3 +234,20 @@ class PracticeRecord(models.Model):
             return self.topic.title
         return "未选择主题"
 
+    def save(self, *args, **kwargs):
+        if self.overall_score >= 90:
+            self.score_level = 'excellent'
+        elif self.overall_score >= 80:
+            self.score_level = 'good'
+        elif self.overall_score >= 70:
+            self.score_level = 'average'
+        elif self.overall_score >= 60:
+            self.score_level = 'needs_improvement'
+        else:
+            self.score_level = 'poor'
+        
+        if self.is_completed and not self.completed_at:
+            from django.utils import timezone
+            self.completed_at = timezone.now()
+        
+        super().save(*args, **kwargs)
