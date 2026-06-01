@@ -89,7 +89,7 @@ class CurrentUserAPIView(APIView):
             partial=True,
             context={'request': request}
         )
-        
+
         if serializer.is_valid():
             serializer.save()
             return Response({
@@ -97,12 +97,46 @@ class CurrentUserAPIView(APIView):
                 'message': '更新成功',
                 'data': UserSerializer(request.user).data
             })
-        
+
         return Response({
             'code': 400,
             'message': '数据验证失败',
             'errors': serializer.errors
         }, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request):
+        """上传头像"""
+        if 'avatar' not in request.FILES:
+            return Response({
+                'code': 400,
+                'message': '请选择要上传的头像文件'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        avatar_file = request.FILES['avatar']
+
+        if avatar_file.size > 5 * 1024 * 1024:
+            return Response({
+                'code': 400,
+                'message': '头像文件大小不能超过 5MB'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        allowed_types = ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+        if avatar_file.content_type not in allowed_types:
+            return Response({
+                'code': 400,
+                'message': '只支持 JPG、PNG、GIF、WebP 格式的图片'
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        request.user.avatar = avatar_file
+        request.user.save()
+
+        return Response({
+            'code': 200,
+            'message': '头像上传成功',
+            'data': {
+                'avatar': request.user.avatar.url if request.user.avatar else None
+            }
+        })
 
 
 class ChangePasswordAPIView(APIView):
@@ -204,6 +238,37 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == 'change_password':
             return ChangePasswordSerializer
         return UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        """返回用户列表（包装响应格式）"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginator = self.paginator
+            return Response({
+                'code': 200,
+                'message': 'success',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.page.paginator.count,
+                    'next': paginator.get_next_link(),
+                    'previous': paginator.get_previous_link(),
+                    'page': paginator.page.number,
+                    'total_pages': paginator.page.paginator.num_pages
+                }
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': {
+                'results': serializer.data,
+                'count': queryset.count()
+            }
+        })
 
     def create(self, request, *args, **kwargs):
         """创建用户（仅管理员）"""

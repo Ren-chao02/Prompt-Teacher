@@ -129,12 +129,28 @@ function createNotificationsStore() {
     },
   }
 
-  return {
+  const store = {
     ...toRefs(state),
     ...actions,
-    ...getters,
     $reset: actions.reset,
   }
+  
+  // 使用defineProperties保留getter的响应式特性
+  Object.defineProperties(store, {
+    hasUnread: {
+      get() { return state.unreadCount > 0 },
+      enumerable: true,
+    },
+    recentNotifications: {
+      get() { return state.notifications.slice(0, 5) },
+      enumerable: true,
+    },
+  })
+  
+  // 添加普通方法
+  store.getUnreadCountByType = (type) => state.unreadByType[type] || 0
+  
+  return store
 }
 
 describe('useNotificationsStore', () => {

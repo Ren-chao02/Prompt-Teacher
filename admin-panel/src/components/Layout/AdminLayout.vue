@@ -2,7 +2,7 @@
   <el-container class="layout-container">
     <!-- 侧边栏 -->
     <el-aside :width="isCollapse ? '64px' : '220px'" class="aside">
-      <div class="logo" @click="$router.push('/admin/dashboard')">
+      <div class="logo" @click="$router.push('/dashboard')">
         <h1 v-if="!isCollapse">Prompt Teacher</h1>
         <span v-else>PT</span>
       </div>
@@ -67,7 +67,7 @@
 
           <!-- 动态面包屑 -->
           <el-breadcrumb separator="/">
-            <el-breadcrumb-item :to="{ path: '/admin/dashboard' }">首页</el-breadcrumb-item>
+            <el-breadcrumb-item :to="{ path: '/dashboard' }">首页</el-breadcrumb-item>
             <el-breadcrumb-item
               v-for="(item, index) in breadcrumbs"
               :key="item.path"
@@ -188,25 +188,25 @@ const isAdminOrTeacher = computed(() => authStore.isAdminOrTeacher)
 
 const menuList = ref([
   {
-    path: '/admin/dashboard',
+    path: '/dashboard',
     title: '仪表盘',
     icon: 'Odometer',
     roles: ['admin', 'teacher', 'student']
   },
   {
-    path: '/admin/learning',
+    path: '/learning',
     title: '学习管理',
     icon: 'Reading',
     roles: ['admin', 'teacher', 'student'],
     children: [
       {
-        path: '/admin/learning/list',
+        path: '/learning/list',
         title: '内容列表',
         icon: 'Document',
         roles: ['admin', 'teacher', 'student']
       },
       {
-        path: '/admin/learning/create',
+        path: '/learning/create',
         title: '创建内容',
         icon: 'EditPen',
         roles: ['admin', 'teacher']
@@ -214,25 +214,25 @@ const menuList = ref([
     ]
   },
   {
-    path: '/admin/practice',
+    path: '/practice',
     title: '练习系统',
     icon: 'Aim',
     roles: ['admin', 'teacher'],
     children: [
       {
-        path: '/admin/practice/scenarios',
+        path: '/practice/scenarios',
         title: '场景管理',
         icon: 'Grid',
         roles: ['admin', 'teacher']
       },
       {
-        path: '/admin/practice/topics',
+        path: '/practice/topics',
         title: '主题管理',
         icon: 'List',
         roles: ['admin', 'teacher']
       },
       {
-        path: '/admin/practice/records',
+        path: '/practice/records',
         title: '练习记录',
         icon: 'Tickets',
         roles: ['admin', 'teacher', 'student']
@@ -240,25 +240,25 @@ const menuList = ref([
     ]
   },
   {
-    path: '/admin/analytics',
+    path: '/analytics',
     title: '数据分析',
     icon: 'DataAnalysis',
     roles: ['admin', 'teacher', 'student'],
     children: [
       {
-        path: '/admin/analytics/overview',
+        path: '/analytics/overview',
         title: '数据概览',
         icon: 'Odometer',
         roles: ['admin', 'teacher', 'student']
       },
       {
-        path: '/admin/analytics/learning',
+        path: '/analytics/learning',
         title: '学习进度',
         icon: 'TrendCharts',
         roles: ['admin', 'teacher', 'student']
       },
       {
-        path: '/admin/analytics/practice',
+        path: '/analytics/practice',
         title: '练习统计',
         icon: 'Histogram',
         roles: ['admin', 'teacher', 'student']
@@ -266,13 +266,13 @@ const menuList = ref([
     ]
   },
   {
-    path: '/admin/users/list',
+    path: '/users/list',
     title: '用户管理',
     icon: 'UserFilled',
     roles: ['admin']
   },
   {
-    path: '/admin/profile',
+    path: '/profile',
     title: '个人中心',
     icon: 'User',
     roles: ['admin', 'teacher', 'student']
@@ -312,7 +312,7 @@ async function handleCommand(command) {
 
 async function handleLogout() {
   await authStore.logout()
-  router.push('/admin/login')
+  window.location.href = '/admin/login/'
 }
 
 function getRoleTagType(role) {

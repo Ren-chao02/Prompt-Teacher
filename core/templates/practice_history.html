@@ -439,7 +439,7 @@
                         <option value="">全部场景</option>
                         {% for scenario in scenarios %}
                         <option value="{{ scenario.scenario_id }}" {% if filter_scenario == scenario.scenario_id %}selected{% endif %}>
-                            {{ scenario.icon }} {{ scenario.title }} ({{ scenario.practice_count }})
+                            {{ scenario.icon }} {{ scenario.title }} ({{ scenario.user_practice_count }})
                         </option>
                         {% endfor %}
                     </select>

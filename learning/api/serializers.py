@@ -47,12 +47,20 @@ class LearningMaterialDetailSerializer(serializers.ModelSerializer):
     def get_author_info(self, obj):
         """获取作者详细信息"""
         if obj.author:
+            author = obj.author
+            avatar_url = None
+            if author.avatar and hasattr(author.avatar, 'url'):
+                try:
+                    avatar_url = author.avatar.url
+                except ValueError:
+                    pass
+            
             return {
-                'id': obj.author.id,
-                'username': obj.author.username,
-                'email': obj.author.email,
-                'avatar': obj.author.avatar,
-                'role': obj.author.role
+                'id': author.id,
+                'username': author.username,
+                'email': author.email,
+                'avatar': avatar_url,
+                'role': author.role
             }
         return None
 

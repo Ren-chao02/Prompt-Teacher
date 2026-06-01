@@ -140,7 +140,7 @@ def practice_history(request):
     records = base_queryset.select_related('scenario', 'topic').order_by('-created_at')[:50]
     
     scenarios = PracticeScenario.objects.filter(is_active=True).annotate(
-        practice_count=Count('practicerecord', filter=Q(practicerecord__user=user))
+        user_practice_count=Count('practicerecord', filter=Q(practicerecord__user=user))
     )
     
     stats = base_queryset.aggregate(

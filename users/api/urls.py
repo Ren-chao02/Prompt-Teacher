@@ -18,7 +18,8 @@ urlpatterns = [
     path('auth/logout/', LogoutAPIView.as_view(), name='logout'),
     path('auth/me/', CurrentUserAPIView.as_view(), name='current-user'),
     path('auth/password/change/', ChangePasswordAPIView.as_view(), name='change-password'),
-    
+    path('users/avatar/', CurrentUserAPIView.as_view(), name='avatar-upload'),
+
     # 用户管理 (通过 router 自动生成 CRUD 路由)
 ]
 

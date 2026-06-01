@@ -294,7 +294,7 @@ async function loadDashboardData() {
     ])
     
     if (statsRes.status === 'fulfilled' && statsRes.value?.data) {
-      const data = statsRes.value.data.data
+      const data = statsRes.value.data
       
       stats.totalLearning = data.overview?.total || 0
       stats.publishedCount = data.overview?.published || 0

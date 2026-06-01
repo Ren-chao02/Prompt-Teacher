@@ -425,78 +425,76 @@ async function handleAutoSave() {
 
 async function handleSaveDraft(status = 'draft') {
   if (!formRef.value) return
-  
-  await formRef.validate(async (valid) => {
-    if (!valid) return
-    
-    saveLoading.value = true
-    
-    try {
-      const data = { ...formData, status }
-      
-      if (isEdit.value) {
-        await updateMaterial(route.params.id, data)
-        ElMessage.success('草稿保存成功')
-      } else {
-        const res = await createMaterial(data)
-        ElMessage.success('创建成功，即将跳转到编辑页面...')
-        
-        setTimeout(() => {
-          router.replace(`/learning/edit/${res.data.id}`)
-        }, 1000)
-      }
-      
-      localStorage.removeItem(`learning_draft_${route.params.id || 'new'}`)
-    } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败，请检查表单')
-    } finally {
-      saveLoading.value = false
+
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  saveLoading.value = true
+
+  try {
+    const data = { ...formData, status }
+
+    if (isEdit.value) {
+      await updateMaterial(route.params.id, data)
+      ElMessage.success('草稿保存成功')
+    } else {
+      const res = await createMaterial(data)
+      ElMessage.success('创建成功，即将跳转到编辑页面...')
+
+      setTimeout(() => {
+        router.replace(`/learning/edit/${res.data.id}`)
+      }, 1000)
     }
-  })
+
+    localStorage.removeItem(`learning_draft_${route.params.id || 'new'}`)
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error('保存失败，请检查表单')
+  } finally {
+    saveLoading.value = false
+  }
 }
 
 async function handlePublish() {
   if (!formRef.value) return
-  
-  await formRef.validate(async (valid) => {
-    if (!valid) return
-    
-    if (!formData.summary.trim()) {
-      ElMessage.warning('发布前请填写摘要')
-      return
-    }
-    
-    publishLoading.value = true
-    
-    try {
-      const data = { ...formData, status: 'published' }
-      
-      if (isEdit.value) {
-        await updateMaterial(route.params.id, data)
-        ElMessage.success('内容已发布！')
-      } else {
-        const res = await createMaterial(data)
-        ElMessage.success('创建并发布成功！')
-        
-        setTimeout(() => {
-          router.push('/learning/list')
-        }, 1500)
-        return
-      }
-      
-      localStorage.removeItem(`learning_draft_${route.params.id || 'new'}`)
-      
+
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  if (!formData.summary.trim()) {
+    ElMessage.warning('发布前请填写摘要')
+    return
+  }
+
+  publishLoading.value = true
+
+  try {
+    const data = { ...formData, status: 'published' }
+
+    if (isEdit.value) {
+      await updateMaterial(route.params.id, data)
+      ElMessage.success('内容已发布！')
+    } else {
+      const res = await createMaterial(data)
+      ElMessage.success('创建并发布成功！')
+
       setTimeout(() => {
         router.push('/learning/list')
-      }, 1000)
-    } catch (error) {
-      console.error('发布失败:', error)
-      ElMessage.error('发布失败，请检查表单')
-    } finally {
-      publishLoading.value = false
+      }, 1500)
+      return
     }
-  })
+
+    localStorage.removeItem(`learning_draft_${route.params.id || 'new'}`)
+
+    setTimeout(() => {
+      router.push('/learning/list')
+    }, 1000)
+  } catch (error) {
+    console.error('发布失败:', error)
+    ElMessage.error('发布失败，请检查表单')
+  } finally {
+    publishLoading.value = false
+  }
 }
 
 function showTagInput() {

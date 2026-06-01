@@ -12,6 +12,7 @@
               :on-success="handleAvatarSuccess"
               :before-upload="beforeAvatarUpload"
               :headers="uploadHeaders"
+              name="avatar"
             >
               <img v-if="userForm.avatar" :src="userForm.avatar" alt="头像" class="avatar-image" />
               <el-icon v-else class="avatar-placeholder"><Plus /></el-icon>
@@ -278,76 +279,74 @@ async function fetchUserInfo() {
 
 async function handleSaveProfile() {
   if (!formRef.value) return
-  
-  await formRef.validate(async (valid) => {
-    if (!valid) return
-    
-    saveLoading.value = true
-    
-    try {
-      const updateData = {
-        email: userForm.email,
-        phone: userForm.phone,
-        student_id: userForm.student_id,
-        major: userForm.major,
-        semester: userForm.semester
-      }
-      
-      const res = await fetch('/api/v1/auth/me/', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authStore.token}`
-        },
-        body: JSON.stringify(updateData)
-      })
-      
-      if (res.ok) {
-        ElMessage.success('个人信息更新成功')
-        await fetchUserInfo()
-      } else {
-        throw new Error('更新失败')
-      }
-    } catch (error) {
-      console.error('保存失败:', error)
-      ElMessage.error('保存失败，请稍后重试')
-    } finally {
-      saveLoading.value = false
+
+  const valid = await formRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  saveLoading.value = true
+
+  try {
+    const updateData = {
+      email: userForm.email,
+      phone: userForm.phone,
+      student_id: userForm.student_id,
+      major: userForm.major,
+      semester: userForm.semester
     }
-  })
+
+    const res = await fetch('/api/v1/auth/me/', {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify(updateData)
+    })
+
+    if (res.ok) {
+      ElMessage.success('个人信息更新成功')
+      await fetchUserInfo()
+    } else {
+      throw new Error('更新失败')
+    }
+  } catch (error) {
+    console.error('保存失败:', error)
+    ElMessage.error('保存失败，请稍后重试')
+  } finally {
+    saveLoading.value = false
+  }
 }
 
 async function handleChangePassword() {
   if (!passwordFormRef.value) return
-  
-  await passwordFormRef.validate(async (valid) => {
-    if (!valid) return
-    
-    try {
-      await ElMessageBox.confirm(
-        '确定要修改密码吗？修改后需要重新登录！',
-        '提示',
-        { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
-      )
-      
-      passwordLoading.value = true
-      
-      await changePasswordApi(passwordForm)
-      
-      ElMessage.success('密码修改成功，即将跳转到登录页面...')
-      
-      setTimeout(() => {
-        authStore.logout()
-        window.location.href = '/admin/login'
-      }, 1500)
-    } catch (error) {
-      if (error !== 'cancel') {
-        console.error('修改密码失败:', error)
-      }
-    } finally {
-      passwordLoading.value = false
+
+  const valid = await passwordFormRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  try {
+    await ElMessageBox.confirm(
+      '确定要修改密码吗？修改后需要重新登录！',
+      '提示',
+      { confirmButtonText: '确定', cancelButtonText: '取消', type: 'warning' }
+    )
+
+    passwordLoading.value = true
+
+    await changePasswordApi(passwordForm)
+
+    ElMessage.success('密码修改成功，即将跳转到登录页面...')
+
+    setTimeout(() => {
+      authStore.logout()
+      window.location.href = '/admin/login/'
+    }, 1500)
+  } catch (error) {
+    if (error !== 'cancel') {
+      console.error('修改密码失败:', error)
     }
-  })
+  } finally {
+    passwordLoading.value = false
+  }
 }
 
 function resetForm() {
@@ -358,6 +357,10 @@ function resetForm() {
     new_password: '',
     new_password_confirm: ''
   })
+  
+  if (formRef.value) {
+    formRef.value.clearValidate()
+  }
   
   if (passwordFormRef.value) {
     passwordFormRef.value.resetFields()

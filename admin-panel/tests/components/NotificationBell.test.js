@@ -117,7 +117,7 @@ describe('NotificationBell.vue', () => {
   })
 
   describe('通知列表展示', () => {
-    it('显示最近通知列表', () => {
+    it('显示最近通知列表', async () => {
       const notifications = [
         { id: 1, title: 'Notif 1' },
         { id: 2, title: 'Notif 2' },
@@ -129,6 +129,10 @@ describe('NotificationBell.vue', () => {
           recentNotifications: notifications
         }
       })
+      
+      // 显示下拉菜单
+      wrapper.vm.showDropdown = true
+      await wrapper.vm.$nextTick()
       
       // 验证通知项被渲染
       const items = wrapper.findAll('.notification-item')

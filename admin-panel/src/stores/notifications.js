@@ -44,15 +44,27 @@ export const useNotificationsStore = defineStore('notifications', () => {
       return
     }
 
-    // 检查是否配置了WebSocket端口，如果没有则不连接（避免连接到Vite服务器）
-    const wsPort = import.meta.env.VITE_WS_PORT
-    if (!wsPort || wsPort === window.location.port) {
-      console.warn('[Notifications] WebSocket port not configured or same as dev server, skipping connection')
-      return
-    }
-
+    // 判断是否运行在Vite开发服务器上（通过是否存在VITE_前缀的环境变量）
+    const isViteDev = typeof import.meta.env !== 'undefined' && import.meta.env.DEV
+    
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const wsHost = window.location.hostname
+    
+    // 优先使用配置的WebSocket端口，否则使用当前页面端口（Django Channels模式）
+    const configuredWsPort = import.meta.env.VITE_WS_PORT
+    let wsPort
+    
+    if (configuredWsPort) {
+      wsPort = configuredWsPort
+    } else if (isViteDev) {
+      // Vite开发模式下，不配置WS端口则跳过连接
+      console.warn('[Notifications] VITE_WS_PORT not configured, skipping WebSocket in dev mode')
+      return
+    } else {
+      // Django生产模式：连接到同一服务器（Channels处理WS）
+      wsPort = window.location.port || (window.location.protocol === 'https:' ? 443 : 80)
+    }
+    
     const wsUrl = `${wsProtocol}//${wsHost}:${wsPort}/ws/notifications/?token=${token}`
 
     console.log('[Notifications] Connecting to WebSocket:', wsUrl.replace(token, '***'))
@@ -94,7 +106,6 @@ export const useNotificationsStore = defineStore('notifications', () => {
       websocket.onerror = (error) => {
         console.error('[Notifications] WebSocket error:', error)
         wsConnected.value = false
-        // 立即关闭，避免连接挂起
         if (websocket) {
           websocket.close()
           websocket = null

@@ -27,41 +27,30 @@ service.interceptors.request.use(
 service.interceptors.response.use(
   (response) => {
     const res = response.data
-    
+
     const showError = response.config.showError !== false
-    
-    if ([200, 201].includes(res.code)) {
-      return res
-    }
-    
-    if (showError) {
-      // 只显示标准的、用户友好的错误消息
-      const friendlyMessages = [
-        '请求失败',
-        '登录已过期',
-        '没有权限访问',
-        '资源不存在',
-        '数据验证失败',
-        '服务器错误'
-      ]
-      
-      const message = res.message || '请求失败'
-      
-      // 过滤掉非标准或过长的错误消息
-      if (message.length < 100 && !/[\x{4e00}-\x{9fa5}]/.test(message) || friendlyMessages.some(m => message.includes(m))) {
-        ElMessage.error(message)
-      } else {
-        ElMessage.error('操作失败，请稍后重试')
+
+    if (res.code && ![200, 201].includes(res.code)) {
+      if (showError) {
+        const message = res.message || '请求失败'
+
+        if (message.length < 100) {
+          ElMessage.error(message)
+        } else {
+          ElMessage.error('操作失败，请稍后重试')
+        }
       }
+
+      if (res.code === 401) {
+        const authStore = useAuthStore()
+        authStore.logout()
+        window.location.href = '/admin/login/'
+      }
+
+      return Promise.reject(new Error(res.message || '请求失败'))
     }
-    
-    if (res.code === 401) {
-      const authStore = useAuthStore()
-      authStore.logout()
-      window.location.href = '/admin/login'
-    }
-    
-    return Promise.reject(new Error(res.message || '请求失败'))
+
+    return res
   },
   (error) => {
     console.error('Response error:', error)
@@ -105,9 +94,9 @@ service.interceptors.response.use(
       if (status === 401) {
         const authStore = useAuthStore()
         authStore.logout()
-        window.location.href = '/admin/login'
+        window.location.href = '/admin/login/'
       }
-      
+
       return Promise.reject({
         message: data?.message || data?.detail || `HTTP ${status}`,
         status,

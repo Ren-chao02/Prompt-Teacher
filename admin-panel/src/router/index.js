@@ -3,16 +3,16 @@ import { useAuthStore } from '@/store/modules/auth'
 
 const routes = [
   {
-    path: '/admin/login',
+    path: '/login',
     name: 'Login',
     component: () => import('@/views/login/index.vue'),
     meta: { requiresAuth: false }
   },
   {
-    path: '/admin',
+    path: '/',
     component: () => import('@/components/Layout/AdminLayout.vue'),
     meta: { requiresAuth: true },
-    redirect: '/admin/dashboard',
+    redirect: '/dashboard',
     children: [
       {
         path: 'dashboard',
@@ -157,65 +157,55 @@ const routes = [
     ]
   },
   {
-    path: '/admin/403',
+    path: '/403',
     name: 'Forbidden',
     component: () => import('@/views/error/403.vue')
   },
   {
-    path: '/admin/:pathMatch(.*)*',
+    path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/error/404.vue')
-  },
-  {
-    path: '/',
-    redirect: '/admin'
-  },
-  {
-    path: '/login',
-    redirect: '/admin/login'
   }
 ]
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory('/admin/'),
   routes
 })
 
 let isInitialized = false
-const pendingNavigation = null
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
-  
+
   if (!isInitialized && authStore.token && !authStore.user) {
     try {
       await authStore.fetchUserInfo()
-      console.log('✅ 路由守卫：用户信息已恢复')
     } catch (error) {
-      console.error('❌ 路由守卫：恢复用户信息失败:', error)
+      console.error('路由守卫：恢复用户信息失败:', error)
       authStore.logout()
-      
-      if (to.path !== '/admin/login') {
-        next({ path: '/admin/login', query: { redirect: to.fullPath } })
+
+      if (to.path !== '/login') {
+        next({ path: '/login', query: { redirect: to.fullPath } })
         return
       }
     }
-    
+
     isInitialized = true
   }
-  
+
   if (to.meta.requiresAuth && !authStore.isLoggedIn) {
-    next({ path: '/admin/login', query: { redirect: to.fullPath } })
+    next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
-  
+
   if (to.meta.roles && to.meta.roles.length > 0) {
     if (!authStore.role || !to.meta.roles.includes(authStore.role)) {
-      next('/admin/403')
+      next('/403')
       return
     }
   }
-  
+
   next()
 })
 

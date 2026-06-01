@@ -79,25 +79,24 @@ const loginRules = {
 
 async function handleLogin() {
   if (!loginFormRef.value) return
-  
-  await loginFormRef.value.validate(async (valid) => {
-    if (valid) {
-      loading.value = true
-      
-      try {
-        await authStore.login(loginForm)
-        
-        ElMessage.success('登录成功')
-        
-        const redirect = route.query.redirect || '/admin/dashboard'
-        router.push(redirect)
-      } catch (error) {
-        console.error('Login error:', error)
-      } finally {
-        loading.value = false
-      }
-    }
-  })
+
+  const valid = await loginFormRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  loading.value = true
+
+  try {
+    await authStore.login(loginForm)
+
+    ElMessage.success('登录成功')
+
+    const redirect = route.query.redirect || '/dashboard'
+    router.push(redirect)
+  } catch (error) {
+    console.error('Login error:', error)
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

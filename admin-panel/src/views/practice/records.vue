@@ -277,7 +277,8 @@
       size="700px"
       direction="rtl"
     >
-      <template v-if="currentRecord">
+      <div v-loading="detailLoading" class="detail-container">
+        <template v-if="currentRecord">
         <div class="detail-content">
           <!-- 基本信息 -->
           <el-descriptions title="基本信息" :column="2" border>
@@ -368,6 +369,7 @@
           <el-empty v-else description="暂无反馈" :image-size="80" />
         </div>
       </template>
+      </div>
     </el-drawer>
   </div>
 </template>
@@ -379,7 +381,7 @@ import {
   Download, Document, CircleCheck, TrendCharts, Timer,
   ArrowDown, ArrowUp, Search, Refresh
 } from '@element-plus/icons-vue'
-import { getRecordList, getScenarioList, getPracticeStatistics } from '@/api/practice'
+import { getRecordList, getScenarioList, getPracticeStatistics, getRecordDetail } from '@/api/practice'
 
 const loading = ref(false)
 const records = ref([])
@@ -390,6 +392,7 @@ const pageSize = ref(10)
 const showAdvancedFilters = ref(false)
 const drawerVisible = ref(false)
 const currentRecord = ref(null)
+const detailLoading = ref(false)
 
 const statistics = reactive({
   total: 0,
@@ -495,8 +498,23 @@ function resetFilters() {
 }
 
 async function handleViewDetail(record) {
-  currentRecord.value = record
   drawerVisible.value = true
+  detailLoading.value = true
+  currentRecord.value = null
+  
+  try {
+    const res = await getRecordDetail(record.id)
+    if (res.code === 200) {
+      currentRecord.value = res.data
+    } else {
+      currentRecord.value = record
+    }
+  } catch (error) {
+    console.error('加载详情失败:', error)
+    currentRecord.value = record
+  } finally {
+    detailLoading.value = false
+  }
 }
 
 async function handleDelete(record) {

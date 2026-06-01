@@ -77,6 +77,37 @@ class PracticeScenarioViewSet(viewsets.ModelViewSet):
         
         return super().get_queryset()
 
+    def list(self, request, *args, **kwargs):
+        """返回场景列表（包装响应格式）"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginator = self.paginator
+            return Response({
+                'code': 200,
+                'message': 'success',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.page.paginator.count,
+                    'next': paginator.get_next_link(),
+                    'previous': paginator.get_previous_link(),
+                    'page': paginator.page.number,
+                    'total_pages': paginator.page.paginator.num_pages
+                }
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': {
+                'results': serializer.data,
+                'count': queryset.count()
+            }
+        })
+
     @action(detail=True, methods=['post'])
     def publish(self, request, pk=None):
         scenario = self.get_object()
@@ -228,6 +259,37 @@ class PracticeTopicViewSet(viewsets.ModelViewSet):
         
         return queryset.select_related('scenario')
 
+    def list(self, request, *args, **kwargs):
+        """返回主题列表（包装响应格式）"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginator = self.paginator
+            return Response({
+                'code': 200,
+                'message': 'success',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.page.paginator.count,
+                    'next': paginator.get_next_link(),
+                    'previous': paginator.get_previous_link(),
+                    'page': paginator.page.number,
+                    'total_pages': paginator.page.paginator.num_pages
+                }
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': {
+                'results': serializer.data,
+                'count': queryset.count()
+            }
+        })
+
     @action(detail=False, methods=['get'])
     def by_scenario(self, request):
         scenario_id = request.query_params.get('scenario_id')
@@ -330,6 +392,37 @@ class PracticeRecordViewSet(viewsets.ModelViewSet):
             return queryset.filter(user_id__in=student_ids)
         
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        """返回记录列表（包装响应格式）"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginator = self.paginator
+            return Response({
+                'code': 200,
+                'message': 'success',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.page.paginator.count,
+                    'next': paginator.get_next_link(),
+                    'previous': paginator.get_previous_link(),
+                    'page': paginator.page.number,
+                    'total_pages': paginator.page.paginator.num_pages
+                }
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': {
+                'results': serializer.data,
+                'count': queryset.count()
+            }
+        })
 
     @action(detail=False, methods=['get'])
     def my_records(self, request):

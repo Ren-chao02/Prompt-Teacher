@@ -45,6 +45,37 @@ class LearningMaterialViewSet(viewsets.ModelViewSet):
     ]
     ordering = ['-order_index', '-created_at']
 
+    def list(self, request, *args, **kwargs):
+        """返回学习资料列表（包装响应格式）"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginator = self.paginator
+            return Response({
+                'code': 200,
+                'message': 'success',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.page.paginator.count,
+                    'next': paginator.get_next_link(),
+                    'previous': paginator.get_previous_link(),
+                    'page': paginator.page.number,
+                    'total_pages': paginator.page.paginator.num_pages
+                }
+            })
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': {
+                'results': serializer.data,
+                'count': queryset.count()
+            }
+        })
+
     def get_permissions(self):
         """根据 action 动态设置权限"""
         if self.action in ['list', 'retrieve']:

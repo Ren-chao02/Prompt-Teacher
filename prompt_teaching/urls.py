@@ -1,13 +1,17 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
-from core.views import home_view
+from core.views import home_view, admin_spa_view
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 urlpatterns = [
-    # Django Admin
-    path('admin/', admin.site.urls),
+    # Django原生后台管理（移到 /django-admin/）
+    path('django-admin/', admin.site.urls),
+    
+    # Vue管理后台SPA（接管 /admin/ 路径）
+    # 必须放在API路由之前，避免冲突
+    re_path(r'^admin/(?P<path>.*)$', admin_spa_view, name='admin-spa'),
     
     # 前台页面
     path('', home_view, name='home'),
@@ -19,8 +23,8 @@ urlpatterns = [
     path('api/v1/', include('users.api.urls')),
     path('api/v1/learning/', include('learning.api.urls')),
     path('api/v1/practice/', include('practice.api.urls')),
-    path('api/v1/analytics/', include('analytics.api.urls')),  # 数据分析模块
-    path('api/v1/notifications/', include('notifications.api.urls')),  # 通知系统模块
+    path('api/v1/analytics/', include('analytics.api.urls')),
+    path('api/v1/notifications/', include('notifications.api.urls')),
     
     # API 文档 (Swagger)
     path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
