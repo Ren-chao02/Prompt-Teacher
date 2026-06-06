@@ -6,7 +6,7 @@ from django.db.models import Q, Count
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import SearchFilter, OrderingFilter
 
-from ..models import LearningMaterial
+from ..models import LearningMaterial, MaterialInteraction
 from .serializers import (
     LearningMaterialListSerializer,
     LearningMaterialDetailSerializer,
@@ -290,13 +290,99 @@ class LearningMaterialViewSet(viewsets.ModelViewSet):
         materials = LearningMaterial.objects.filter(
             author=request.user
         ).order_by('-updated_at')
-        
+
         page = self.paginate_queryset(materials)
         if page is not None:
-            serializer = LearningMaterialListSerializer(page, many=True)
+            serializer = LearningMaterialListSerializer(
+                page, many=True, context=self.get_serializer_context()
+            )
             return self.get_paginated_response(serializer.data)
-        
-        serializer = LearningMaterialListSerializer(materials, many=True)
+
+        serializer = LearningMaterialListSerializer(
+            materials, many=True, context=self.get_serializer_context()
+        )
+        return Response({
+            'code': 200,
+            'data': serializer.data,
+            'total': materials.count()
+        })
+
+    @action(detail=True, methods=['post'])
+    def toggle_like(self, request, pk=None):
+        """切换点赞状态"""
+        material = self.get_object()
+        user = request.user
+
+        existing = MaterialInteraction.objects.filter(
+            user=user, material=material, interaction_type='like'
+        ).first()
+
+        if existing:
+            existing.delete()
+            material.like_count = max(0, material.like_count - 1)
+            material.save(update_fields=['like_count'])
+            return Response({
+                'code': 200,
+                'message': '取消点赞',
+                'data': {'liked': False, 'like_count': material.like_count}
+            })
+
+        MaterialInteraction.objects.create(
+            user=user, material=material, interaction_type='like'
+        )
+        material.like_count += 1
+        material.save(update_fields=['like_count'])
+        return Response({
+            'code': 200,
+            'message': '点赞成功',
+            'data': {'liked': True, 'like_count': material.like_count}
+        })
+
+    @action(detail=True, methods=['post'])
+    def toggle_favorite(self, request, pk=None):
+        """切换收藏状态"""
+        material = self.get_object()
+        user = request.user
+
+        existing = MaterialInteraction.objects.filter(
+            user=user, material=material, interaction_type='favorite'
+        ).first()
+
+        if existing:
+            existing.delete()
+            return Response({
+                'code': 200,
+                'message': '取消收藏',
+                'data': {'favorited': False}
+            })
+
+        MaterialInteraction.objects.create(
+            user=user, material=material, interaction_type='favorite'
+        )
+        return Response({
+            'code': 200,
+            'message': '收藏成功',
+            'data': {'favorited': True}
+        })
+
+    @action(detail=False, methods=['get'])
+    def my_favorites(self, request):
+        """我的收藏列表"""
+        fav_ids = MaterialInteraction.objects.filter(
+            user=request.user, interaction_type='favorite'
+        ).values_list('material_id', flat=True)
+        materials = LearningMaterial.objects.filter(id__in=fav_ids).order_by('-created_at')
+
+        page = self.paginate_queryset(materials)
+        if page is not None:
+            serializer = LearningMaterialListSerializer(
+                page, many=True, context=self.get_serializer_context()
+            )
+            return self.get_paginated_response(serializer.data)
+
+        serializer = LearningMaterialListSerializer(
+            materials, many=True, context=self.get_serializer_context()
+        )
         return Response({
             'code': 200,
             'data': serializer.data,

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import LearningMaterial
+from ..models import LearningMaterial, MaterialInteraction
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -7,32 +7,57 @@ User = get_user_model()
 
 class LearningMaterialListSerializer(serializers.ModelSerializer):
     """学习资料列表序列化器（精简版）"""
-    
+
     author_name = serializers.CharField(source='author.username', read_only=True)
     category_display = serializers.CharField(source='get_category_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     reading_time = serializers.IntegerField(read_only=True)
-    
+    is_liked = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+
     class Meta:
         model = LearningMaterial
         fields = [
             'id', 'title', 'summary', 'category', 'category_display',
             'status', 'status_display', 'author', 'author_name',
             'cover_image', 'tags', 'view_count', 'like_count',
-            'order_index', 'created_at', 'updated_at', 'reading_time'
+            'order_index', 'created_at', 'updated_at', 'reading_time',
+            'is_liked', 'is_favorited'
         ]
         read_only_fields = ['id', 'view_count', 'like_count', 'created_at', 'updated_at']
+
+    def _user(self):
+        request = self.context.get('request')
+        return request.user if request and request.user.is_authenticated else None
+
+    def get_is_liked(self, obj):
+        user = self._user()
+        if not user:
+            return False
+        return MaterialInteraction.objects.filter(
+            user=user, material=obj, interaction_type='like'
+        ).exists()
+
+    def get_is_favorited(self, obj):
+        user = self._user()
+        if not user:
+            return False
+        return MaterialInteraction.objects.filter(
+            user=user, material=obj, interaction_type='favorite'
+        ).exists()
 
 
 class LearningMaterialDetailSerializer(serializers.ModelSerializer):
     """学习资料详情序列化器（完整版）"""
-    
+
     author_info = serializers.SerializerMethodField()
     category_display = serializers.CharField(source='get_category_display', read_only=True)
     status_display = serializers.CharField(source='get_status_display', read_only=True)
     reading_time = serializers.IntegerField(read_only=True)
     is_published = serializers.BooleanField(read_only=True)
-    
+    is_liked = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+
     class Meta:
         model = LearningMaterial
         fields = [
@@ -40,9 +65,29 @@ class LearningMaterialDetailSerializer(serializers.ModelSerializer):
             'status', 'status_display', 'author', 'author_info',
             'cover_image', 'tags', 'view_count', 'like_count',
             'order_index', 'created_at', 'updated_at', 'published_at',
-            'reading_time', 'is_published'
+            'reading_time', 'is_published', 'is_liked', 'is_favorited'
         ]
         read_only_fields = ['id', 'view_count', 'like_count', 'created_at', 'updated_at', 'published_at']
+
+    def _user(self):
+        request = self.context.get('request')
+        return request.user if request and request.user.is_authenticated else None
+
+    def get_is_liked(self, obj):
+        user = self._user()
+        if not user:
+            return False
+        return MaterialInteraction.objects.filter(
+            user=user, material=obj, interaction_type='like'
+        ).exists()
+
+    def get_is_favorited(self, obj):
+        user = self._user()
+        if not user:
+            return False
+        return MaterialInteraction.objects.filter(
+            user=user, material=obj, interaction_type='favorite'
+        ).exists()
     
     def get_author_info(self, obj):
         """获取作者详细信息"""

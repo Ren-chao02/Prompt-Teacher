@@ -27,7 +27,6 @@
           type="password"
           show-password
           placeholder="请输入新密码（至少6位）"
-          show-strength
         />
       </el-form-item>
 
@@ -53,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, nextTick } from 'vue'
 import { ElMessage } from 'element-plus'
 import { resetUserPassword } from '@/api/user'
 
@@ -93,35 +92,52 @@ const formRules = {
 
 watch(() => props.visible, (val) => {
   if (!val) return
-  
+
   formData.new_password = ''
   formData.new_password_confirm = ''
-  
-  if (formRef.value) {
-    formRef.value.resetFields()
-  }
+
+  nextTick(() => {
+    if (formRef.value && typeof formRef.value.resetFields === 'function') {
+      formRef.value.resetFields()
+    }
+  })
 })
 
 async function handleSubmit() {
-  if (!formRef.value || !props.user) return
-  
-  await formRef.validate(async (valid) => {
-    if (!valid) return
-    
-    submitLoading.value = true
-    
-    try {
-      await resetUserPassword(props.user.id, formData.new_password)
-      
-      ElMessage.success(`用户 ${props.user.username} 的密码已成功重置`)
-      emit('success')
-      emit('update:visible', false)
-    } catch (error) {
-      console.error('重置密码失败:', error)
-    } finally {
-      submitLoading.value = false
-    }
-  })
+  if (!props.user) {
+    ElMessage.warning('未选择用户')
+    return
+  }
+
+  await nextTick()
+
+  const form = formRef.value
+  if (!form || typeof form.validate !== 'function') {
+    ElMessage.error('表单未就绪，请稍后重试')
+    return
+  }
+
+  try {
+    await form.validate()
+  } catch (_validationError) {
+    return
+  }
+
+  submitLoading.value = true
+
+  try {
+    await resetUserPassword(props.user.id, formData.new_password)
+
+    ElMessage.success(`用户 ${props.user.username} 的密码已成功重置`)
+    emit('success')
+    emit('update:visible', false)
+  } catch (error) {
+    const msg = error?.message || error?.data?.message || '重置密码失败'
+    ElMessage.error(msg)
+    console.error('重置密码失败:', error)
+  } finally {
+    submitLoading.value = false
+  }
 }
 
 function handleClosed() {

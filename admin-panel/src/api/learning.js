@@ -74,3 +74,25 @@ export function getStatistics() {
     method: 'get'
   })
 }
+
+export function toggleLike(id) {
+  return request({
+    url: `/learning/materials/${id}/toggle_like/`,
+    method: 'post'
+  })
+}
+
+export function toggleFavorite(id) {
+  return request({
+    url: `/learning/materials/${id}/toggle_favorite/`,
+    method: 'post'
+  })
+}
+
+export function getMyFavorites(params) {
+  return request({
+    url: '/learning/materials/my_favorites/',
+    method: 'get',
+    params
+  })
+}

@@ -85,6 +85,16 @@ const routes = [
         }
       },
       {
+        path: 'learning/my',
+        name: 'MyMaterials',
+        component: () => import('@/views/learning/my-materials.vue'),
+        meta: {
+          title: '我的内容',
+          icon: 'FolderOpened',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
         path: 'practice/scenarios',
         name: 'PracticeScenarios',
         component: () => import('@/views/practice/scenarios.vue'),

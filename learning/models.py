@@ -104,3 +104,43 @@ class LearningMaterial(models.Model):
         """下架内容"""
         self.status = 'archived'
         self.save()
+
+
+class MaterialInteraction(models.Model):
+    """用户对学习资料的交互（点赞/收藏）"""
+
+    INTERACTION_TYPES = [
+        ('like', '点赞'),
+        ('favorite', '收藏'),
+    ]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='material_interactions',
+        verbose_name='用户'
+    )
+    material = models.ForeignKey(
+        LearningMaterial,
+        on_delete=models.CASCADE,
+        related_name='interactions',
+        verbose_name='学习资料'
+    )
+    interaction_type = models.CharField(
+        max_length=20,
+        choices=INTERACTION_TYPES,
+        verbose_name='交互类型'
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+
+    class Meta:
+        verbose_name = '资料交互'
+        verbose_name_plural = '资料交互'
+        unique_together = [('user', 'material', 'interaction_type')]
+        indexes = [
+            models.Index(fields=['material', 'interaction_type']),
+            models.Index(fields=['user', 'interaction_type']),
+        ]
+
+    def __str__(self):
+        return f'{self.user} - {self.interaction_type} - {self.material_id}'
