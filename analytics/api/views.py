@@ -49,21 +49,39 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         """
         user = request.user
         period = request.query_params.get('period', '30d')
-        
+
         start_date, end_date = BaseAnalyticsService.get_time_range(period)
-        
+
+        # 教师权限过滤：仅显示所教学生数据
+        role = getattr(user, 'role', 'student')
+        teacher_student_ids = None
+        if role == 'teacher':
+            teacher_student_ids = BaseAnalyticsService.get_teacher_managed_student_ids(user)
+            if not teacher_student_ids:
+                return Response({
+                    'code': 200,
+                    'message': '您暂未管理任何学生',
+                    'data': {
+                        'learning': {'total_materials': 0, 'today_new': 0, 'completion_rate': 0, 'avg_read_time': 0},
+                        'practice': {'total_records': 0, 'avg_score': 0, 'pass_rate': 0},
+                        'users': {'active_today': 0, 'new_this_week': 0, 'retention_rate': 0},
+                        'daily_trend': [],
+                        'top_content': [],
+                        'top_users': []
+                    }
+                })
+
         data = {
             'learning': self._get_learning_overview(start_date, end_date),
-            'practice': self._get_practice_overview(start_date, end_date),
-            'users': self._get_user_overview(start_date, end_date),
-            'daily_trend': self._get_daily_trend(start_date, end_date),
+            'practice': self._get_practice_overview(start_date, end_date, teacher_student_ids),
+            'users': self._get_user_overview(start_date, end_date, teacher_student_ids),
+            'daily_trend': self._get_daily_trend(start_date, end_date, teacher_student_ids),
             'top_content': self._get_top_content(limit=10),
         }
-        
+
         # 权限控制：只有管理员和教师可以看到优秀学员排行
-        role = getattr(user, 'role', 'student')
         if role in ['admin', 'teacher']:
-            data['top_users'] = self._get_top_users(limit=10)
+            data['top_users'] = self._get_top_users(limit=10, student_ids=teacher_student_ids)
         
         serializer = OverviewResponseSerializer(data)
         return Response({
@@ -102,10 +120,13 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'avg_read_time': avg_read_time
         }
     
-    def _get_practice_overview(self, start_date=None, end_date=None):
+    def _get_practice_overview(self, start_date=None, end_date=None, student_ids=None):
         """获取练习模块概览数据"""
         base_qs = PracticeRecord.objects.all()
-        
+
+        if student_ids:
+            base_qs = base_qs.filter(user_id__in=student_ids)
+
         if start_date and end_date:
             base_qs = base_qs.filter(created_at__range=[start_date, end_date])
         
@@ -129,25 +150,27 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'pass_rate': pass_rate
         }
     
-    def _get_user_overview(self, start_date=None, end_date=None):
+    def _get_user_overview(self, start_date=None, end_date=None, student_ids=None):
         """获取用户统计数据"""
         today_start = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         week_ago = timezone.now() - timedelta(days=7)
-        
+
         # 今日活跃用户 (有登录或有操作记录)
-        active_today = UserProfile.objects.filter(
-            last_login__gte=today_start
-        ).count()
-        
+        active_qs = UserProfile.objects.filter(last_login__gte=today_start)
+        if student_ids:
+            active_qs = active_qs.filter(pk__in=student_ids)
+        active_today = active_qs.count()
+
         # 本周新增用户
-        new_this_week = UserProfile.objects.filter(
-            date_joined__gte=week_ago
-        ).count()
+        new_qs = UserProfile.objects.filter(date_joined__gte=week_ago)
+        if student_ids:
+            new_qs = new_qs.filter(pk__in=student_ids)
+        new_this_week = new_qs.count()
         
         # 留存率 (简化计算：7天前注册且今天还登录的用户 / 7天前注册的总用户)
-        retention_base = UserProfile.objects.filter(
-            date_joined__lte=week_ago
-        )
+        retention_base = UserProfile.objects.filter(date_joined__lte=week_ago)
+        if student_ids:
+            retention_base = retention_base.filter(pk__in=student_ids)
         retained_count = retention_base.filter(
             last_login__gte=today_start
         ).count()
@@ -163,29 +186,32 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'retention_rate': retention_rate
         }
     
-    def _get_daily_trend(self, start_date=None, end_date=None):
+    def _get_daily_trend(self, start_date=None, end_date=None, student_ids=None):
         """获取每日趋势数据"""
         days = BaseAnalyticsService.PERIOD_MAP.get('30d', 30)
         if start_date and end_date:
             days = (end_date - start_date).days
-        
+
         trend_data = []
         current_date = (end_date or timezone.now()).date()
-        
+
         for i in range(min(days, 30), 0, -1):
             day = current_date - timedelta(days=i)
             day_start = timezone.make_aware(timezone.datetime.combine(day, timezone.datetime.min.time()))
             day_end = day_start + timedelta(days=1)
-            
+
             # 当日新增学习资料数
             material_count = LearningMaterial.objects.filter(
                 created_at__range=[day_start, day_end]
             ).count()
-            
+
             # 当日练习记录数
-            practice_count = PracticeRecord.objects.filter(
+            practice_qs = PracticeRecord.objects.filter(
                 created_at__range=[day_start, day_end]
-            ).count()
+            )
+            if student_ids:
+                practice_qs = practice_qs.filter(user_id__in=student_ids)
+            practice_count = practice_qs.count()
             
             trend_data.append({
                 'date': day.isoformat(),
@@ -213,14 +239,17 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         
         return result
     
-    def _get_top_users(self, limit=10):
+    def _get_top_users(self, limit=10, student_ids=None):
         """获取优秀学员排行 (仅Admin/Teacher可见)"""
         top_users = UserProfile.objects.annotate(
             total_practices=Count('practice_records'),
             avg_score=Avg('practice_records__overall_score')
         ).filter(
             total_practices__gt=0
-        ).order_by('-avg_score', '-total_practices')[:limit].values(
+        )
+        if student_ids:
+            top_users = top_users.filter(pk__in=student_ids)
+        top_users = top_users.order_by('-avg_score', '-total_practices')[:limit].values(
             'id', 'username', 'role', 'total_practices', 'avg_score'
         )
         
@@ -247,16 +276,23 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         user_id = request.query_params.get('user_id')
         period = request.query_params.get('period', '30d')
         category = request.query_params.get('category')
-        
+
         start_date, end_date = BaseAnalyticsService.get_time_range(period)
-        
-        # 权限控制：学生只能看自己的数据
+
+        # 权限控制
+        role = getattr(user, 'role', '')
         target_user_id = user_id
-        if getattr(user, 'role', '') == 'student':
+        teacher_student_ids = None
+
+        if role == 'student':
             target_user_id = str(user.id)
-        
+        elif role == 'teacher':
+            # 教师：查看所教学生的汇总学习数据
+            teacher_student_ids = BaseAnalyticsService.get_teacher_managed_student_ids(user)
+            target_user_id = None  # 教师看汇总，不看单人
+
         data = {
-            'timeline': self._get_learning_timeline(target_user_id, start_date, end_date),
+            'timeline': self._get_learning_timeline(target_user_id, start_date, end_date, teacher_student_ids),
             'completion': self._get_completion_stats(target_user_id, category),
             'popular_content': self._get_popular_by_category(category, limit=10),
             'reading_habits': self._get_reading_habits(target_user_id)
@@ -269,13 +305,14 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'data': serializer.data
         })
     
-    def _get_learning_timeline(self, user_id, start_date=None, end_date=None):
+    def _get_learning_timeline(self, user_id, start_date=None, end_date=None, student_ids=None):
         """获取学习时间线数据 - 使用LearningMaterial的创建时间和阅读量"""
         base_qs = LearningMaterial.objects.all()
-        
+
         if user_id:
-            # 如果指定用户，只看该用户创建的资料（或后续添加作者过滤）
             base_qs = base_qs.filter(author_id=user_id)
+        if student_ids:
+            base_qs = base_qs.filter(author_id__in=student_ids)
         
         if start_date and end_date:
             base_qs = base_qs.filter(created_at__range=[start_date, end_date])
@@ -420,25 +457,28 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         scenario_id = request.query_params.get('scenario_id')
         score_level = request.query_params.get('score_level')
         period = request.query_params.get('period', '30d')
-        
+
         start_date, end_date = BaseAnalyticsService.get_time_range(period)
-        
+
         # 权限控制
         target_user_id = user_id
-        if getattr(user, 'role', '') == 'student':
-            target_user_id = str(user.id)
-        
-        data = {
-            'score_trend': self._get_score_trend(target_user_id, scenario_id, start_date, end_date),
-            'distribution': self._get_score_distribution(target_user_id, scenario_id, score_level),
-            'scenario_comparison': self._get_scenario_comparison(target_user_id),
-            'weak_points': self._identify_weak_points(target_user_id)
-        }
-        
-        # 排行榜仅对管理员和教师可见
         role = getattr(user, 'role', '')
+        teacher_student_ids = None
+        if role == 'student':
+            target_user_id = str(user.id)
+        elif role == 'teacher':
+            teacher_student_ids = BaseAnalyticsService.get_teacher_managed_student_ids(user)
+
+        data = {
+            'score_trend': self._get_score_trend(target_user_id, scenario_id, start_date, end_date, teacher_student_ids),
+            'distribution': self._get_score_distribution(target_user_id, scenario_id, score_level, teacher_student_ids),
+            'scenario_comparison': self._get_scenario_comparison(target_user_id, teacher_student_ids),
+            'weak_points': self._identify_weak_points(target_user_id, teacher_student_ids)
+        }
+
+        # 排行榜仅对管理员和教师可见
         if role in ['admin', 'teacher']:
-            data['ranking'] = self._get_practice_ranking(scenario_id, limit=20)
+            data['ranking'] = self._get_practice_ranking(scenario_id, limit=20, student_ids=teacher_student_ids)
         
         serializer = PracticeStatisticsResponseSerializer(data)
         return Response({
@@ -447,12 +487,14 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'data': serializer.data
         })
     
-    def _get_score_trend(self, user_id=None, scenario_id=None, start_date=None, end_date=None):
+    def _get_score_trend(self, user_id=None, scenario_id=None, start_date=None, end_date=None, student_ids=None):
         """获取成绩趋势"""
         base_qs = PracticeRecord.objects.all()
-        
+
         if user_id:
             base_qs = base_qs.filter(user_id=user_id)
+        if student_ids:
+            base_qs = base_qs.filter(user_id__in=student_ids)
         if scenario_id:
             base_qs = base_qs.filter(scenario_id=scenario_id)
         if start_date and end_date:
@@ -480,12 +522,14 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
             'avg_score': round(avg_score, 1)
         }
     
-    def _get_score_distribution(self, user_id=None, scenario_id=None, score_level=None):
+    def _get_score_distribution(self, user_id=None, scenario_id=None, score_level=None, student_ids=None):
         """获取分数分布"""
         base_qs = PracticeRecord.objects.all()
-        
+
         if user_id:
             base_qs = base_qs.filter(user_id=user_id)
+        if student_ids:
+            base_qs = base_qs.filter(user_id__in=student_ids)
         if scenario_id:
             base_qs = base_qs.filter(scenario_id=scenario_id)
         if score_level:
@@ -521,12 +565,14 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         
         return distribution
     
-    def _get_scenario_comparison(self, user_id=None):
+    def _get_scenario_comparison(self, user_id=None, student_ids=None):
         """各场景表现对比"""
         base_qs = PracticeRecord.objects.all()
-        
+
         if user_id:
             base_qs = base_qs.filter(user_id=user_id)
+        if student_ids:
+            base_qs = base_qs.filter(user_id__in=student_ids)
         
         comparison = base_qs.values('scenario__id', 'scenario__title', 'scenario__icon', 'scenario__difficulty').annotate(
             avg_score=Avg('overall_score'),
@@ -549,12 +595,14 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         
         return result[:10]  # Top 10 场景
     
-    def _identify_weak_points(self, user_id=None):
+    def _identify_weak_points(self, user_id=None, student_ids=None):
         """识别薄弱知识点"""
         base_qs = PracticeRecord.objects.all()
-        
+
         if user_id:
             base_qs = base_qs.filter(user_id=user_id)
+        if student_ids:
+            base_qs = base_qs.filter(user_id__in=student_ids)
         
         topic_stats = base_qs.values('topic__id', 'topic__title').annotate(
             total_attempts=Count('id'),
@@ -579,13 +627,16 @@ class AnalyticsViewSet(viewsets.GenericViewSet):
         
         return weak_points
     
-    def _get_practice_ranking(self, scenario_id=None, limit=20):
+    def _get_practice_ranking(self, scenario_id=None, limit=20, student_ids=None):
         """练习排行榜"""
         base_qs = UserProfile.objects.annotate(
             total_practices=Count('practice_records'),
             avg_score=Avg('practice_records__overall_score'),
             best_score=Max('practice_records__overall_score')
         ).filter(total_practices__gt=0)
+
+        if student_ids:
+            base_qs = base_qs.filter(pk__in=student_ids)
         
         if scenario_id:
             base_qs = base_qs.filter(

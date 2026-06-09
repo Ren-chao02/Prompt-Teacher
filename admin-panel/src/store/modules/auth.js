@@ -6,7 +6,8 @@ export const useAuthStore = defineStore('auth', {
     token: localStorage.getItem('token') || '',
     user: null,
     role: localStorage.getItem('user_role') || '',
-    isLoggedIn: !!localStorage.getItem('token')
+    isLoggedIn: !!localStorage.getItem('token'),
+    mustChangePassword: false
   }),
 
   getters: {
@@ -20,10 +21,15 @@ export const useAuthStore = defineStore('auth', {
       const res = await loginApi(credentials)
       const data = res.data
       
+      // DEBUG: 追踪登录返回的用户数据
+      console.log('[Auth Debug] 登录响应 data.user:', data.user)
+      console.log('[Auth Debug] data.user.real_name:', data.user?.real_name)
+      
       this.token = data.access
       this.role = data.user.role
       this.user = data.user
       this.isLoggedIn = true
+      this.mustChangePassword = !!data.user.must_change_password
       
       localStorage.setItem('token', data.access)
       localStorage.setItem('refresh_token', data.refresh)
@@ -34,6 +40,9 @@ export const useAuthStore = defineStore('auth', {
 
     async fetchUserInfo() {
       const res = await getUserInfoApi()
+      // DEBUG: 追踪用户信息获取
+      console.log('[Auth Debug] fetchUserInfo res.data:', res.data)
+      console.log('[Auth Debug] fetchUserInfo real_name:', res.data?.real_name)
       this.user = res.data
       this.role = res.data.role
       

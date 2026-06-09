@@ -8,7 +8,7 @@ from django.utils import timezone
 import time
 import json
 
-from .models import PracticeScenario, PracticeTopic, PracticeRecord
+from .models import PracticeScenario, PracticeTopic, PracticeRecord, LLMConfig
 from .services.llm_service import llm_service
 
 
@@ -52,7 +52,16 @@ def practice_detail(request, scenario_id):
             except PracticeTopic.DoesNotExist:
                 pass
 
-        result = llm_service.evaluate_prompt(user_prompt, system_prompt)
+        # 支持使用用户选择的LLM模型
+        llm_config = None
+        llm_config_id = request.POST.get('llm_config_id')
+        if llm_config_id:
+            try:
+                llm_config = LLMConfig.objects.get(id=llm_config_id, owner=request.user, is_active=True)
+            except (LLMConfig.DoesNotExist, ValueError):
+                pass
+
+        result = llm_service.evaluate_prompt(user_prompt, system_prompt, config=llm_config)
 
         end_time = time.time()
         duration_seconds = int(end_time - start_time)

@@ -25,12 +25,41 @@ const routes = [
         }
       },
       {
+        path: 'teacher/workspace',
+        name: 'TeacherWorkspace',
+        component: () => import('@/views/teacher/Workspace.vue'),
+        meta: {
+          title: '我的工作台',
+          icon: 'Monitor',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
+        path: 'teacher/student/:id',
+        name: 'TeacherStudentDetail',
+        component: () => import('@/views/teacher/StudentDetail.vue'),
+        meta: {
+          title: '学生详情',
+          roles: ['admin', 'teacher']
+        }
+      },
+      {
         path: 'users/list',
         name: 'UserList',
         component: () => import('@/views/user/list.vue'),
         meta: {
           title: '用户管理',
           icon: 'UserFilled',
+          roles: ['admin']
+        }
+      },
+      {
+        path: 'users/class',
+        name: 'ClassManage',
+        component: () => import('@/views/user/class/index.vue'),
+        meta: {
+          title: '班级管理',
+          icon: 'School',
           roles: ['admin']
         }
       },
@@ -121,7 +150,7 @@ const routes = [
         meta: {
           title: '练习记录',
           icon: 'DocumentChecked',
-          roles: ['admin', 'teacher', 'student']
+          roles: ['admin', 'student']
         }
       },
       {
@@ -214,6 +243,12 @@ router.beforeEach(async (to, from, next) => {
       next('/403')
       return
     }
+  }
+
+  // 教师登录后优先进入工作台
+  if ((to.path === '/' || to.path === '/dashboard') && authStore.role === 'teacher') {
+    next('/teacher/workspace')
+    return
   }
 
   next()

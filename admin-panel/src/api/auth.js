@@ -1,6 +1,7 @@
 import request from './request'
 
 export function loginApi(data) {
+  // data: { identifier, password, login_type }
   return request({
     url: '/auth/login/',
     method: 'post',
@@ -28,5 +29,15 @@ export function changePasswordApi(data) {
     url: '/auth/password/change/',
     method: 'post',
     data
+  })
+}
+
+/**
+ * 获取教师管理的班级列表
+ */
+export function getMyClasses() {
+  return request({
+    url: '/auth/my_classes/',
+    method: 'get'
   })
 }

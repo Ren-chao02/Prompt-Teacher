@@ -39,7 +39,10 @@ def admin_spa_view(request, path=''):
     if os.path.isfile(index_path):
         with open(index_path, 'r', encoding='utf-8') as f:
             html = f.read()
-        return HttpResponse(html, content_type='text/html; charset=utf-8')
+        response = HttpResponse(html, content_type='text/html; charset=utf-8')
+        response['Cache-Control'] = 'no-store, no-cache, must-revalidate'
+        response['Pragma'] = 'no-cache'
+        return response
     
     # 如果 index.html 不存在，提示构建
     return HttpResponse(

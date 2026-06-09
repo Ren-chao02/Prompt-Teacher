@@ -9,61 +9,76 @@
     <link href="{% static 'css/variables.css' %}" rel="stylesheet">
     <link href="{% static 'css/style.css' %}" rel="stylesheet">
     {% block extra_css %}
+    <style>
+      @media(max-width:768px){
+        body > nav { padding:12px 16px !important; flex-wrap:wrap; gap:8px; }
+        body > nav > div:nth-child(2) { display:none; }
+      }
+    </style>
     {% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="/">🎯 提示词教学平台</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/">首页</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'practice:practice' %}">实战练习</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'learning:list' %}">学习中心</a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    {% if user.is_authenticated %}
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                {{ user.username }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{% url 'practice:history' %}">我的记录</a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">退出登录</a></li>
-                            </ul>
-                        </li>
-                    {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:login' %}">登录</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'users:register' %}">注册</a>
-                        </li>
-                    {% endif %}
-                </ul>
-            </div>
+    <nav style="display:flex; align-items:center; justify-content:space-between; padding:16px 40px; position:relative; z-index:100; background:rgba(255,251,247,.78); backdrop-filter:blur(20px); border-bottom:1px solid rgba(237,228,219,.5);">
+        <a href="/" style="display:flex; align-items:center; gap:12px; text-decoration:none; color:#2D2520;">
+            <div style="width:38px; height:38px; border-radius:12px; background:linear-gradient(135deg,#E07B39,#EC8B7A); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:900; font-size:1.15rem;">P</div>
+            <span style="font-size:1.15rem; font-weight:700;">提示词教学平台</span>
+        </a>
+        <div style="display:flex; align-items:center; gap:6px;">
+            <a href="/" style="padding:9px 18px; border-radius:10px; text-decoration:none; color:#6B5E52; font-size:.92rem; font-weight:500; transition:all .22s ease;" onmouseover="this.style.color='#E07B39';this.style.background='rgba(224,123,57,.05)'" onmouseout="this.style.color='#6B5E52';this.style.background='transparent'">首页</a>
+            <a href="{% url 'practice:practice' %}" style="padding:9px 18px; border-radius:10px; text-decoration:none; color:#6B5E52; font-size:.92rem; font-weight:500; transition:all .22s ease;" onmouseover="this.style.color='#E07B39';this.style.background='rgba(224,123,57,.05)'" onmouseout="this.style.color='#6B5E52';this.style.background='transparent'">实战练习</a>
+            <a href="{% url 'learning:list' %}" style="padding:9px 18px; border-radius:10px; text-decoration:none; color:#6B5E52; font-size:.92rem; font-weight:500; transition:all .22s ease;" onmouseover="this.style.color='#E07B39';this.style.background='rgba(224,123,57,.05)'" onmouseout="this.style.color='#6B5E52';this.style.background='transparent'">学习中心</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+            {% if user.is_authenticated %}
+                <a href="{% url 'users:profile' %}" style="text-decoration:none; color:#6B5E52; font-size:.88rem; font-weight:500; transition:color .2s; padding:6px 12px; border-radius:8px;" onmouseover="this.style.color='#E07B39';this.style.background='rgba(224,123,57,.05)'" onmouseout="this.style.color='#6B5E52';this.style.background='transparent'">个人中心</a>
+                <a href="{% url 'users:logout' %}" style="padding:9px 22px; border-radius:10px; background:#E07B39; color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; border:none; cursor:pointer; transition:background .22s ease;" onmouseover="this.style.background='#C96A2D'" onmouseout="this.style.background='#E07B39'">登出</a>
+            {% else %}
+                <a href="{% url 'users:login' %}" style="text-decoration:none; color:#6B5E52; font-size:.9rem; font-weight:500; transition:color .2s;" onmouseover="this.style.color='#E07B39'" onmouseout="this.style.color='#6B5E52'">登录</a>
+                <a href="{% url 'users:register' %}" style="padding:9px 22px; border-radius:10px; background:#E07B39; color:#fff; text-decoration:none; font-size:.88rem; font-weight:600; border:none; cursor:pointer; transition:background .22s ease;" onmouseover="this.style.background='#C96A2D'" onmouseout="this.style.background='#E07B39'">免费注册</a>
+            {% endif %}
         </div>
     </nav>
 
     {% if messages %}
-        <div class="container mt-3">
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            {% endfor %}
+    <div id="msg-container" style="position:fixed;top:80px;left:50%;transform:translateX(-50%);z-index:9999;pointer-events:none;display:flex;flex-direction:column;gap:8px;">
+        {% for message in messages %}
+        <div class="msg-toast msg-{{ message.tags|default:'info' }}" data-index="{{ forloop.counter0 }}">
+            <span class="msg-icon">&#10003;</span>
+            <span>{{ message }}</span>
+            <button class="msg-close" onclick="this.parentElement.remove()">&times;</button>
         </div>
+        {% endfor %}
+    </div>
+    <style>
+    .msg-toast {
+      display:flex;align-items:center;gap:10px;padding:12px 24px;border-radius:12px;
+      font-size:.92rem;font-weight:500;color:#2D2520;pointer-events:auto;
+      background:linear-gradient(135deg,#FFF4EB,#FFE8D6);
+      border:1px solid rgba(224,123,57,.2);
+animation:msg-in .35s ease both;min-width:280px;
+    }
+    .msg-toast.msg-success { background:linear-gradient(135deg,#E8F5E9,#C8E6C9);border-color:rgba(76,175,80,.3); }
+    .msg-toast.msg-error { background:linear-gradient(135deg,#FFEBEE,#FFCDD2);border-color:rgba(244,67,54,.3); }
+    .msg-toast.msg-warning { background:linear-gradient(135deg,#FFF8E1,#FFECB3);border-color:rgba(255,152,0,.3); }
+    .msg-icon { width:20px;height:20px;border-radius:50%;background:#4CAF50;color:#fff;
+      display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0; }
+    .msg-success .msg-icon { background:#4CAF50; }
+    .msg-error .msg-icon { background:#EF4444; }
+    .msg-warning .msg-icon { background:#F59E0B; color:#fff; }
+    .msg-close { background:none;border:none;font-size:1.2rem;cursor:pointer;color:#6B5E52;
+      padding:0 4px;line-height:1;transition:color .2s;margin-left:auto; }
+    .msg-close:hover { color:#E07B39; }
+    @keyframes msg-in { from{opacity:0;transform:translateY(-16px) scale(.96)} to{opacity:1;transform:translateY(0) scale(1)} }
+    @keyframes msg-out { from{opacity:1;transform:translateY(0) scale(1)} to{opacity:0;transform:translateY(-12px) scale(.95)} }
+    </style>
+    <script>
+    (function(){
+      var toasts = document.querySelectorAll('.msg-toast');
+      toasts.forEach(function(t,i){
+        setTimeout(function(){ t.style.animation='msg-out .3s ease both'; setTimeout(function(){ t.remove(); },300); },2500 + i*400);
+      });
+    })();
+    </script>
     {% endif %}
 
     <main class="container mt-4">
@@ -71,9 +86,9 @@
         {% endblock %}
     </main>
 
-    <footer class="bg-light text-center py-3 mt-5">
+    <footer style="background: #FFF4EB; text-align: center; padding: 24px 0; margin-top: 60px; border-top: 1px solid #EDE4DB;">
         <div class="container">
-            <p class="mb-0">&copy; 2024 提示词教学平台 | 所有权利保留 |  powered by yet</p>
+            <p class="mb-0" style="color: #6B5E52;">&copy; 2024 提示词教学平台 | 所有权利保留</p>
         </div>
     </footer>
 

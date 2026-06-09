@@ -2,121 +2,182 @@
 
 {% block title %}实战练习 - 提示词教学平台{% endblock %}
 
-{% block content %}
-<div class="row">
-    <div class="col-12">
-        <h2 class="mb-4">🎮 实战练习</h2>
-        
-        <div class="card">
-            <div class="card-body">
-                <form method="post" id="practiceForm">
-                    {% csrf_token %}
-                    
-                    <div class="mb-3">
-                        <label for="scenario" class="form-label">选择场景</label>
-                        <select name="scenario" id="scenario" class="form-select">
-                            {% for key, value in scenarios.items %}
-                                <option value="{{ key }}" {% if key == selected_scenario %}selected{% endif %}>{{ value }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="user_prompt" class="form-label">输入你的提示词</label>
-                        <textarea 
-                            name="user_prompt" 
-                            id="user_prompt" 
-                            class="form-control" 
-                            rows="6" 
-                            placeholder="在这里输入你想要测试的提示词...&#10;&#10;例如：请帮我写一篇关于人工智能发展前景的文章，要求包含技术趋势、社会影响和未来展望三个部分。"
-                            required
-                        >{% if result %}{{ form.user_prompt.value }}{% endif %}</textarea>
-                        <div class="form-text">输入你想让AI执行的提示词，系统将从多个维度进行评估</div>
-                    </div>
-                    
-                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                            🚀 开始评估
-                        </button>
-                    </div>
-                </form>
+{% block extra_css %}
+<style>
+body { background: #FFFBF7 !important; }
+.practice-page { max-width: 960px; margin: 0 auto; padding: 36px 20px 60px; }
+.page-title {
+  font-size: 1.8rem; font-weight: 700; color: #2D2520;
+  display: flex; align-items: center; gap: 10px; margin-bottom: 6px;
+}
+.page-subtitle { color: #6B5E52; font-size: .95rem; margin-bottom: 28px; }
 
-                <div id="loadingOverlay" style="display: none;" class="text-center py-5">
-                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                        <span class="visually-hidden">加载中...</span>
-                    </div>
-                    <h4 class="text-muted mb-2">🤔 请耐心等候</h4>
-                    <p class="text-muted mb-1">大模型正在深度思考和分析您的提示词...</p>
-                    <small class="text-muted">这可能需要 5-15 秒时间</small>
-                    <div class="mt-3">
-                        <div class="progress" style="height: 4px;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%; background-color: var(--color-primary);"></div>
-                        </div>
+.practice-card {
+  background: white; border-radius: 16px;
+padding: 32px; border: 1px solid #F5EDE3;
+}
+.form-label { font-weight: 600; color: #2D2520; font-size: .92rem; margin-bottom: 6px; }
+.form-select, .form-control {
+  border: 2px solid #EDE4DB; border-radius: 10px; padding: 10px 14px;
+  font-size: .95rem; transition: all .25s ease; background: white;
+}
+.form-select:focus, .form-control:focus {
+  border-color: #E07B39;
+outline: none;
+}
+.form-text { color: #9CA3AF; font-size: .82rem; margin-top: 4px; }
+
+.btn-submit {
+  background: linear-gradient(135deg, #E07B39, #C96A2D);
+  color: white; border: none; border-radius: 10px;
+  padding: 12px 36px; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all .3s ease;
+}
+.btn-submit:hover { transform: translateY(-1px);
+}
+
+/* Loading */
+.loading-overlay { text-align: center; padding: 48px 20px; }
+.spinner-border { color: #E07B39 !important; }
+
+/* Results */
+.result-section { margin-top: 28px; padding-top: 24px; border-top: 2px solid #F5EDE3; }
+.result-section h3 { font-size: 1.25rem; font-weight: 700; color: #2D2520; margin-bottom: 18px; }
+.score-card {
+  background: linear-gradient(135deg, #E07B39, #D4A574);
+  color: white; border-radius: 14px; padding: 24px; text-align: center;
+}
+.score-card h2 { font-size: 2.8rem; font-weight: 800; margin-bottom: 4px; }
+.score-card p { opacity: .9; margin: 0; }
+
+.progress { height: 24px; border-radius: 12px; background: #FFF4EB; overflow: hidden; }
+.progress-bar {
+  background: linear-gradient(135deg, #E07B39, #EB9A5C);
+  transition: width .8s ease; font-weight: 600; font-size: .85rem;
+}
+
+.alert-success {
+border-radius: 10px;
+  background: #ECFDF5; color: #065F46; padding: 14px 18px;
+}
+.alert-success h5 { color: #047857; }
+.alert-info {
+border-radius: 10px;
+  background: #FFF4EB; color: #92400E; padding: 14px 18px;
+}
+.alert-info h5 { color: #C96A2D; }
+
+.btn-outline-secondary-custom {
+  color: #6B5E52; border: 2px solid #EDE4DB; border-radius: 10px;
+  padding: 8px 20px; text-decoration: none; font-weight: 500;
+  transition: all .25s ease; display: inline-block;
+}
+.btn-outline-secondary-custom:hover { border-color: #E07B39; color: #E07B39; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="practice-page">
+    <h2 class="page-title">🎮 实战练习</h2>
+    <p class="page-subtitle">输入你的提示词，AI 将从多个维度进行专业评估</p>
+
+    <div class="practice-card">
+        <form method="post" id="practiceForm">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="scenario" class="form-label">选择场景</label>
+                <select name="scenario" id="scenario" class="form-select">
+                    {% for key, value in scenarios.items %}
+                        <option value="{{ key }}" {% if key == selected_scenario %}selected{% endif %}>{{ value }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="user_prompt" class="form-label">输入你的提示词</label>
+                <textarea
+                    name="user_prompt"
+                    id="user_prompt"
+                    class="form-control"
+                    rows="6"
+                    placeholder="在这里输入你想要测试的提示词...&#10;&#10;例如：请帮我写一篇关于人工智能发展前景的文章，要求包含技术趋势、社会影响和未来展望三个部分。"
+                    required
+                >{% if result %}{{ form.user_prompt.value }}{% endif %}</textarea>
+                <div class="form-text">输入你想让 AI 执行的提示词，系统将从多个维度进行评估</div>
+            </div>
+
+            <div style="text-align: right;">
+                <button type="submit" class="btn btn-submit" id="submitBtn">
+                    🚀 开始评估
+                </button>
+            </div>
+        </form>
+
+        <div id="loadingOverlay" style="display: none;" class="loading-overlay">
+            <div class="spinner-border mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+            <h4 style="color: #2D2520; margin-bottom: 6px;">🤔 请耐心等候</h4>
+            <p style="color: #6B5E52; margin-bottom: 4px;">大模型正在深度思考和分析您的提示词...</p>
+            <small style="color: #9CA3AF;">这可能需要 5-15 秒时间</small>
+        </div>
+
+        {% if result %}
+        <div class="result-section" id="resultSection">
+            <h3>📊 评估结果</h3>
+
+            <div style="display:flex; gap:24px; margin-bottom:24px;">
+                <div style="flex:0 0 220px;">
+                    <div class="score-card">
+                        <h2>{{ result.overall_score }}</h2>
+                        <p>综合得分</p>
                     </div>
                 </div>
-                
-                {% if result %}
-                <hr>
-                <div class="mt-4" id="resultSection">
-                    <h3>📊 评估结果</h3>
-                    
-                    <div class="row mb-4">
-                        <div class="col-md-4 text-center">
-                            <div class="card text-white" style="background-color: var(--color-primary);">
-                                <div class="card-body">
-                                    <h2 class="display-4">{{ result.overall_score }}</h2>
-                                    <p class="mb-0">综合得分</p>
-                                </div>
+                <div style="flex:1;">
+                    <div style="background:white; border-radius:12px; padding:20px; border:1px solid #F5EDE3;">
+                        <h5 style="color:#2D2520;margin-bottom:14px;font-weight:600;">各维度评分</h5>
+                        {% for dimension, score in result.scores.items %}
+                        <div style="margin-bottom:12px;">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                                <span style="font-weight:500;color:#2D2520;font-size:.9rem;">
+                                    {% if dimension == 'clarity' %}清晰度
+                                    {% elif dimension == 'completeness' %}完整性
+                            {% elif dimension == 'structure' %}结构化
+                            {% elif dimension == 'creativity' %}创造性
+                            {% elif dimension == 'actionability' %}可执行性
+                            {% elif dimension == 'context_awareness' %}上下文感知
+                            {% else %}{{ dimension|title }}
+                            {% endif %}
+                                </span>
+                                <span style="font-weight:700;color:#E07B39;">{{ score }}/100</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar" style="width: {{ score }}%;">{{ score }}</div>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="card">
-                                <div class="card-body">
-                                    <h5>各维度评分</h5>
-                                    {% for dimension, score in result.scores.items %}
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span><strong>{% if dimension == 'clarity' %}清晰度{% elif dimension == 'completeness' %}完整性{% elif dimension == 'structure' %}结构化{% elif dimension == 'creativity' %}创造性{% elif dimension == 'actionability' %}可执行性{% elif dimension == 'context_awareness' %}上下文感知{% else %}{{ dimension|title }}{% endif %}</strong></span>
-                                            <span><strong>{{ score }}</strong>/100</span>
-                                        </div>
-                                        <div class="progress" style="height: 22px; border-radius: 11px; overflow: hidden;">
-                                            <div class="progress-bar" 
-                                                 role="progressbar" 
-                                                 style="width: {{ score }}%; background-color: var(--color-primary); transition: width 0.8s ease;"
-                                                 aria-valuenow="{{ score }}" 
-                                                 aria-valuemin="0" 
-                                                 aria-valuemax="100">
-                                                <span style="color: white; font-weight: 600;">{{ score }}</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    {% if result.strengths %}
-                    <div class="alert alert-success">
-                        <h5>✨ 优点</h5>
-                        <p>{{ result.strengths }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    {% if result.suggestions %}
-                    <div class="alert alert-info">
-                        <h5>💡 改进建议</h5>
-                        <p>{{ result.suggestions }}</p>
-                    </div>
-                    {% endif %}
-                    
-                    <div class="text-end mt-3">
-                        <a href="{% url 'practice:detail' record_id %}" class="btn btn-outline-secondary">查看详情</a>
+                        {% endfor %}
                     </div>
                 </div>
-                {% endif %}
+            </div>
+
+            {% if result.strengths %}
+            <div class="alert-success" style="margin-bottom: 14px;">
+                <h5>✨ 优点</h5>
+                <p style="margin:0;">{{ result.strengths }}</p>
+            </div>
+            {% endif %}
+
+            {% if result.suggestions %}
+            <div class="alert-info" style="margin-bottom: 14px;">
+                <h5>💡 改进建议</h5>
+                <p style="margin:0;">{{ result.suggestions }}</p>
+            </div>
+            {% endif %}
+
+            <div style="text-align:right; margin-top:16px;">
+                <a href="{% url 'practice:detail' record_id %}" class="btn-outline-secondary-custom">查看详情 →</a>
             </div>
         </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
@@ -127,10 +188,10 @@ document.getElementById('practiceForm').addEventListener('submit', function(e) {
     const form = this;
     const btn = document.getElementById('submitBtn');
     const loadingOverlay = document.getElementById('loadingOverlay');
-    
+
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>评估中...';
-    
+
     setTimeout(() => {
         form.style.display = 'none';
         loadingOverlay.style.display = 'block';

@@ -11,11 +11,6 @@ body {
 .card {
     border: none;
     border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
 
 .nav-tabs .nav-link {
@@ -53,7 +48,7 @@ body {
 }
 
 .form-control:focus, .form-select:focus {
-    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    border-color: #E07B39;
 }
 
 .display-4 {

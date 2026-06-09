@@ -92,6 +92,21 @@
           </div>
         </div>
       </el-col>
+
+      <el-col :xs="12" :sm="12" :md="6" v-if="isAdmin">
+        <div class="stat-card stat-card--purple">
+          <div class="stat-icon">
+            <el-icon :size="28"><School /></el-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats.classCount }}</div>
+            <div class="stat-label">班级数</div>
+            <div class="stat-trend">
+              <span class="trend-text">共 {{ stats.classStudentTotal }} 名学生</span>
+            </div>
+          </div>
+        </div>
+      </el-col>
     </el-row>
 
     <!-- 学习进度 + 最近活动 -->
@@ -354,6 +369,7 @@ import {
   Reading,
   Aim,
   TrendCharts,
+  School,
   EditPen,
   Grid,
   UserFilled,
@@ -387,6 +403,8 @@ const stats = reactive({
   avgScore: 0,
   publishedCount: 0,
   todayPractice: 0,
+  classCount: 0,
+  classStudentTotal: 0,
   userTrend: 12.5,
   scoreLevel: 4
 })
@@ -688,6 +706,14 @@ async function loadDashboardData() {
 
     if (userStatsRes.status === 'fulfilled' && userStatsRes.value?.data) {
       stats.totalUsers = userStatsRes.value.data.total || 0
+
+      // 班级维度统计
+      if (userStatsRes.value.data.by_class) {
+        stats.classCount = userStatsRes.value.data.by_class.length
+        stats.classStudentTotal = userStatsRes.value.data.by_class.reduce(
+          (sum, c) => sum + (c.student_count || 0), 0
+        )
+      }
     }
 
     if (practiceStatsRes.status === 'fulfilled' && practiceStatsRes.value?.data) {
@@ -946,6 +972,9 @@ function formatTime(time) {
 
 .stat-card--red { --card-color: #EF4444; }
 .stat-card--red .stat-icon { background: linear-gradient(135deg, #F87171, #DC2626); }
+
+.stat-card--purple { --card-color: #8B5CF6; }
+.stat-card--purple .stat-icon { background: linear-gradient(135deg, #A78BFA, #7C3AED); }
 
 .stat-icon {
   width: 60px;

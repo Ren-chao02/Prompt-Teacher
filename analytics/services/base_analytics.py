@@ -100,13 +100,47 @@ class BaseAnalyticsService:
                 return queryset.filter(user_id=user.id)
         
         elif role == 'teacher':
-            # 教师可以看到所教学生数据 (TODO: 实现班级逻辑)
-            # 暂时返回全部，后续添加班级过滤
-            return queryset
+            # 教师只能看到自己管理的学生数据
+            from users.models import UserProfile
+
+            managed_student_ids = UserProfile.objects.filter(
+                teacher=user
+            ).values_list('pk', flat=True)
+
+            if not managed_student_ids:
+                return queryset.none()
+
+            model = queryset.model
+            if model == UserProfile:
+                return queryset.filter(pk__in=managed_student_ids)
+            if hasattr(model, 'user') or hasattr(model, 'user_id'):
+                return queryset.filter(user_id__in=managed_student_ids)
+            try:
+                return queryset.filter(user_id__in=managed_student_ids)
+            except Exception:
+                return queryset
         
         # 管理员可以看到所有数据
         return queryset
-    
+
+    @classmethod
+    def get_teacher_managed_student_ids(cls, teacher_user):
+        """获取教师管理的学生ID列表"""
+        from users.models import UserProfile
+        return list(UserProfile.objects.filter(
+            teacher=teacher_user
+        ).values_list('pk', flat=True))
+
+    @classmethod
+    def get_teacher_managed_class_ids(cls, teacher_user):
+        """获取教师管理的班级ID列表（通过学生关联）"""
+        from users.models import UserProfile
+        return list(UserProfile.objects.filter(
+            teacher=teacher_user
+        ).exclude(class_info=None).values_list(
+            'class_id', flat=True
+        ).distinct())
+
     @classmethod
     def safe_divide(cls, numerator, denominator, default=0):
         """

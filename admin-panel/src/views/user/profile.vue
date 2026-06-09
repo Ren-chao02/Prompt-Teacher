@@ -5,11 +5,11 @@
       <div class="hero-bg" />
       <div class="hero-content">
         <el-avatar :src="userForm.avatar" :size="96" class="hero-avatar">
-          {{ (userForm.username || 'U').charAt(0).toUpperCase() }}
+          {{ (userForm.real_name || userForm.username || 'U').charAt(0).toUpperCase() }}
         </el-avatar>
         <div class="hero-info">
           <h2 class="hero-name">
-            {{ userForm.username }}
+            {{ userForm.real_name || userForm.username }}
             <el-tag :type="getRoleTagType(userForm.role)" effect="dark" size="small" round>
               {{ getRoleLabel(userForm.role) }}
             </el-tag>
@@ -59,10 +59,18 @@
             >
               <el-row :gutter="20">
                 <el-col :span="12">
+                  <el-form-item label="姓名" prop="real_name">
+                    <el-input v-model="userForm.real_name" placeholder="请输入真实姓名" />
+                  </el-form-item>
+                </el-col>
+                <el-col :span="12">
                   <el-form-item label="用户名">
                     <el-input v-model="userForm.username" disabled />
                   </el-form-item>
                 </el-col>
+              </el-row>
+
+              <el-row :gutter="20">
                 <el-col :span="12">
                   <el-form-item label="角色">
                     <el-input :value="getRoleLabel(userForm.role)" disabled />
@@ -298,6 +306,7 @@ const loadingAct = ref(false)
 
 const userForm = reactive({
   username: '',
+  real_name: '',
   email: '',
   phone: '',
   avatar: '',
@@ -321,6 +330,9 @@ const activities = ref([])
 const overview = ref({ likes: 0, favorites: 0, practices: 0, avg_score: 0 })
 
 const formRules = {
+  real_name: [
+    { required: true, message: '请输入姓名', trigger: 'blur' }
+  ],
   email: [
     { required: true, message: '请输入邮箱', trigger: 'blur' },
     { type: 'email', message: '请输入正确的邮箱地址', trigger: 'blur' }
@@ -363,8 +375,13 @@ async function fetchUserInfo() {
   try {
     const res = await getUserInfoApi()
     const u = res.data
+    // DEBUG: 追踪 real_name 数据流
+    console.log('[Profile Debug] API响应:', res)
+    console.log('[Profile Debug] u (res.data):', u)
+    console.log('[Profile Debug] u.real_name:', u.real_name, '(type:', typeof u.real_name + ')')
     Object.assign(userForm, {
       username: u.username || '',
+      real_name: u.real_name || '',
       email: u.email || '',
       phone: u.phone || '',
       avatar: u.avatar || '',
@@ -376,6 +393,7 @@ async function fetchUserInfo() {
       last_login: u.last_login || ''
     })
     authStore.user = u
+    console.log('[Profile Debug] userForm.real_name 赋值后:', userForm.real_name)
   } catch (e) {
     console.error(e)
   }
@@ -453,6 +471,7 @@ async function handleSaveProfile() {
   saveLoading.value = true
   try {
     const updateData = {
+      real_name: userForm.real_name,
       email: userForm.email,
       phone: userForm.phone,
       student_id: userForm.student_id,

@@ -76,3 +76,63 @@ export function getUserStatistics() {
     method: 'get'
   })
 }
+
+export function getClassList(params) {
+  return request({
+    url: '/classes/',
+    method: 'get',
+    params
+  })
+}
+
+export function createClass(data) {
+  return request({
+    url: '/classes/',
+    method: 'post',
+    data
+  })
+}
+
+export function updateClass(id, data) {
+  return request({
+    url: `/classes/${id}/`,
+    method: 'put',
+    data
+  })
+}
+
+export function deleteClass(id) {
+  return request({
+    url: `/classes/${id}/`,
+    method: 'delete'
+  })
+}
+
+export function previewImport(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/users/preview_import/',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' },
+    timeout: 60000
+  })
+}
+
+export function confirmImport(rows) {
+  return request({
+    url: '/users/confirm_import/',
+    method: 'post',
+    data: { rows },
+    showError: false
+  })
+}
+
+export function downloadImportTemplate() {
+  return request({
+    url: '/users/download_template/',
+    method: 'get',
+    responseType: 'blob'
+  })
+}

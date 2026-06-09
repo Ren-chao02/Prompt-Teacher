@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from ..models import PracticeScenario, PracticeTopic, PracticeRecord
+from ..models import PracticeScenario, PracticeTopic, PracticeRecord, LLMConfig
 
 
 class PracticeScenarioListSerializer(serializers.ModelSerializer):
@@ -317,3 +317,60 @@ class PracticeRecordUpdateSerializer(serializers.ModelSerializer):
             instance.scenario.increment_practice_count()
         
         return instance
+
+
+class LLMConfigSerializer(serializers.ModelSerializer):
+    """LLM配置序列化器（不含API Key明文）"""
+    provider_display = serializers.CharField(source='get_provider_display', read_only=True)
+
+    class Meta:
+        model = LLMConfig
+        fields = [
+            'id', 'name', 'provider', 'provider_display',
+            'api_url', 'model_id', 'is_default', 'is_active',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def validate(self, attrs):
+        if attrs.get('is_default'):
+            request = self.context.get('request')
+            if request and request.user.is_authenticated:
+                existing = LLMConfig.objects.filter(
+                    owner=request.user,
+                    is_default=True
+                )
+                if self.instance:
+                    existing = existing.exclude(pk=self.instance.pk)
+                if existing.exists():
+                    raise serializers.ValidationError({
+                        'is_default': '您已有一个默认模型，请先取消之前的默认设置'
+                    })
+        return attrs
+
+
+class LLMConfigCreateSerializer(serializers.ModelSerializer):
+    """创建/编辑时使用（含API Key）"""
+    provider_display = serializers.CharField(source='get_provider_display', read_only=True)
+
+    class Meta:
+        model = LLMConfig
+        fields = [
+            'id', 'name', 'provider', 'provider_display',
+            'api_url', 'api_key', 'model_id',
+            'is_default', 'is_active',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['id', 'created_at', 'updated_at']
+
+
+class LLMConfigTestSerializer(serializers.Serializer):
+    """测试连接专用序列化器"""
+    api_url = serializers.CharField(max_length=500)
+    api_key = serializers.CharField(max_length=500, required=False, allow_blank=True, default='')
+    model_id = serializers.CharField(max_length=100)
+
+    def validate_api_url(self, value):
+        if not value.startswith(('http://', 'https://')):
+            raise serializers.ValidationError('API地址必须以 http:// 或 https:// 开头')
+        return value

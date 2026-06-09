@@ -1,127 +1,398 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}首页 - 提示词教学平台{% endblock %}
+{% block title %}提示词教学平台 — 让每个人都能写好提示词{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== 隐藏 base.html 的旧页脚、消息栏，释放容器 ===== */
+footer { display:none !important; }
+main.container.mt-4 { padding:0 !important; margin:0 !important; max-width:none !important; }
+
+/* ===== Design System v2.8 — Warm Education SaaS ===== */
+:root {
+  --primary:#E07B39; --primary-dark:#C96A2D;
+  --bg:#FFFBF7; --bg-subtle:#FFF4EB; --fg:#2D2520;
+  --fg-light:#6B5E52; --border:#EDE4DB;
+  --radius-sm:10px; --radius-md:18px; --radius-xl:30px;
+  --shadow:0 1px 3px rgba(45,37,32,.06), 0 6px 24px rgba(180,140,90,.06);
+  font-family:'Noto Sans SC','PingFang SC',-apple-system,sans-serif;
+  color:var(--fg); background:var(--bg);
+}
+* { box-sizing:border-box; margin:0; padding:0; }
+body { line-height:1.65; -webkit-font-smoothing:antialiased; background:var(--bg) !important; color:var(--fg) !important; font-family:'Noto Sans SC','PingFang SC',-apple-system,sans-serif !important; }
+
+/* ===== NAVBAR (由 base.html 统一提供) ===== */
+
+/* ===== HERO SECTION ===== */
+.hero {
+  position:relative; min-height:100vh; display:flex;
+  align-items:center; padding:37px 30px 40px; overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:-2;
+  background:
+    radial-gradient(ellipse 80% 55% at 15% 35%, rgba(224,123,57,.13) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 50% at 85% 75%, rgba(236,139,122,.08) 0%, transparent 60%);
+}
+.hero-grid-dots {
+  position:absolute; inset:0; z-index:-1; opacity:.35;
+  background-image:radial-gradient(circle, rgba(180,140,90,.14) 1px, transparent 1px);
+  background-size:28px 28px;
+}
+.hero-left { flex:1; max-width:580px; animation:fade-up .8s ease both; }
+@keyframes fade-up { from{opacity:0;transform:translateY(28px)} to{opacity:1;transform:translateY(0)} }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 18px; border-radius:999px;
+  background:rgba(224,123,57,.08); border:1px solid rgba(224,123,57,.15);
+  font-size:.82rem; font-weight:600; color:var(--primary); margin-bottom:24px;
+}
+.badge-dot { width:8px; height:8px; border-radius:50%; background:var(--primary); }
+.hero-title { font-size:3rem; line-height:1.15; font-weight:800; color:var(--fg); letter-spacing:-.03em; margin-bottom:20px; }
+.hero-title .highlight { color:var(--primary); }
+.hero-desc { font-size:1.08rem; color:var(--fg-light); line-height:1.72; margin-bottom:32px; max-width:480px; }
+.hero-btns { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:44px; }
+.btn-hero {
+  padding:15px 32px; border-radius:var(--radius-md); font-size:.98rem;
+  font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:8px;
+  transition:all .25s ease; border:none; cursor:pointer;
+}
+.btn-hero-solid { background:var(--primary); color:#fff;
+}
+.btn-hero-solid:hover { background:var(--primary-dark); transform:translateY(-2px);
+}
+.btn-hero-outline {
+  background:transparent; color:var(--fg); border:2px solid var(--border);
+}
+.btn-hero-outline:hover { border-color:var(--primary); color:var(--primary); background:rgba(224,123,57,.04); }
+.hero-stats { display:flex; gap:36px; }
+.hero-stat-item h3 { font-size:1.75rem; font-weight:700; color:var(--fg); }
+.hero-stat-item p { font-size:.85rem; color:var(--fg-light); margin-top:2px; }
+
+/* Hero right side — SVG 词云 */
+.hero-visual {
+  position:relative; margin-left:161px; width:809px; height:742px; flex-shrink:0;
+  animation:float-in 1s ease .5s both;
+  display:flex; align-items:center; justify-content:center;
+  border-radius:var(--radius-xl); overflow:hidden;
+}
+.hero-visual img {
+  width:100%; height:auto;
+  mix-blend-mode:multiply; opacity:.95;
+  animation:cloud-img-float 7s ease-in-out infinite;
+}
+@keyframes float-in { from{opacity:0;transform:translateY(36px)} to{opacity:1;transform:translateY(0)} }
+@keyframes cloud-img-float { 0%,100%{transform:translateY(0) rotate(0deg)} 50%{transform:translateY(-10px) rotate(.3deg)} }
+
+/* ===== FOR WHOM — 双角色介绍 ===== */
+.for-whom { padding:90px 48px; background:var(--bg-subtle); }
+.for-whom-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:1fr 1fr; gap:28px; }
+.section-header { text-align:center; margin-bottom:56px; }
+.section-tag { display:inline-block; padding:6px 18px; border-radius:999px; background:rgba(224,123,57,.08); font-size:.84rem; font-weight:700; color:var(--primary); margin-bottom:16px; }
+.section-title { font-size:2.1rem; font-weight:800; color:var(--fg); letter-spacing:-.02em; }
+.role-card {
+  background:#fff; border-radius:var(--radius-md); padding:36px 32px;
+  border:1px solid var(--border);
+  transition:transform .28s ease;
+}
+.role-card:hover { transform:translateY(-6px); }
+.role-card-header { display:flex; align-items:center; gap:16px; margin-bottom:20px; }
+.role-icon {
+  width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  font-size:1.5rem; flex-shrink:0;
+}
+.role-icon-student { background:linear-gradient(135deg,#3B82F6,#60A5FA); }
+.role-icon-teacher { background:linear-gradient(135deg,var(--primary),#F59E0B); }
+.role-card h3 { font-size:1.35rem; font-weight:700; color:var(--fg); }
+.role-card > p { color:var(--fg-light); font-size:.95rem; line-height:1.68; margin-bottom:20px; }
+.role-list { list-style:none; }
+.role-list li { padding:8px 0; font-size:.91rem; color:var(--fg); display:flex; align-items:center; gap:10px; }
+.role-list li::before { content:"✓"; color:var(--primary); font-weight:800; flex-shrink:0; }
+
+/* ===== FEATURES — 6大特色能力 ===== */
+.features { padding:90px 48px; }
+.features-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.feature-card {
+  background:#fff; border-radius:var(--radius-md); padding:30px 26px;
+border:1px solid var(--border);
+  transition:all .28s ease;
+}
+.feature-card:hover { transform:translateY(-5px);
+border-color:rgba(224,123,57,.2); }
+.feature-icon {
+  width:46px; height:46px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+  font-size:1.3rem; margin-bottom:18px;
+}
+.feature-card h3 { font-size:1.1rem; font-weight:700; color:var(--fg); margin-bottom:10px; }
+.feature-card p { font-size:.89rem; color:var(--fg-light); line-height:1.62; }
+.feature-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:16px; }
+.tag { padding:4px 13px; border-radius:999px; background:var(--bg-subtle); font-size:.78rem; font-weight:600; color:var(--fg-light); }
+
+/* ===== WHY US — 优势 ===== */
+.why-us { padding:90px 48px; background:var(--bg-subtle); }
+.why-grid { max-width:900px; margin:0 auto; display:grid; grid-template-columns:repeat(2,1fr); gap:24px; }
+.why-card {
+  background:#fff; border-radius:var(--radius-md); padding:32px 28px;
+border:1px solid var(--border);
+  display:flex; gap:18px; align-items:flex-start; transition:all .25s ease;
+}
+.why-card:hover { transform:translateY(-3px);
+}
+.why-num {
+  width:42px; height:42px; border-radius:12px; background:linear-gradient(135deg,var(--primary),#F59E0B);
+  color:#fff; display:flex; align-items:center; justify-content:center;
+  font-weight:800; font-size:1.05rem; flex-shrink:0;
+}
+.why-card h3 { font-size:1.08rem; font-weight:700; color:var(--fg); margin-bottom:6px; }
+.why-card p { font-size:.88rem; color:var(--fg-light); line-height:1.6; }
+
+/* ===== HOW IT WORKS ===== */
+.how-it-works { padding:90px 48px; }
+.steps-container { max-width:850px; margin:0 auto; display:flex; justify-content:space-between; position:relative; }
+.steps-line {
+  position:absolute; top:36px; left:60px; right:60px; height:2px;
+  background:linear-gradient(90deg,var(--primary),#F59E0B); opacity:.2;
+}
+.step { text-align:center; position:relative; z-index:1; flex:1; }
+.step-num {
+  width:72px; height:72px; border-radius:50%; background:var(--bg); border:3px solid var(--primary);
+  display:flex; align-items:center; justify-content:center; margin:0 auto 18px;
+  font-size:1.5rem; font-weight:800; color:var(--primary);
+}
+.step h3 { font-size:1.05rem; font-weight:700; color:var(--fg); margin-bottom:6px; }
+.step p { font-size:.86rem; color:var(--fg-light); line-height:1.58; max-width:200px; margin:0 auto; }
+
+/* ===== CTA ===== */
+.cta-section {
+  padding:76px 48px; background:linear-gradient(135deg,#E07B39 0%,#D4A05A 50%,#EC8B7A 100%);
+  text-align:center;
+}
+.cta-section h2 { font-size:2rem; font-weight:800; color:#fff; margin-bottom:14px; }
+.cta-section p { font-size:1.05rem; color:rgba(255,255,255,.88); margin-bottom:32px; max-width:520px; margin-left:auto; margin-right:auto; }
+.btn-cta {
+  padding:16px 40px; border-radius:var(--radius-md); background:#fff; color:var(--primary);
+  font-size:1rem; font-weight:700; text-decoration:none; display:inline-block;
+  transition:all .25s ease; border:none; cursor:pointer;
+}
+.btn-cta:hover { transform:translateY(-2px);
+}
+
+/* ===== FOOTER ===== */
+.footer { padding:32px 48px; text-align:center; border-top:1px solid var(--border); }
+.footer p { font-size:.84rem; color:var(--fg-light); }
+
+/* Responsive */
+@media(max-width:1024px){
+  .hero { padding:60px 48px !important; flex-direction:column; text-align:center; }
+  .hero-left { max-width:100%; }
+  .hero-desc { max-width:100%; margin-left:auto; margin-right:auto; }
+  .hero-btns { justify-content:center; }
+  .hero-stats { justify-content:center; }
+  .hero-visual { margin-left:0 !important; margin-top:40px; width:100% !important; max-width:560px; height:auto !important; }
+  .for-whom-grid { grid-template-columns:1fr; }
+  .features-grid { grid-template-columns:1fr 1fr; }
+  .why-grid { grid-template-columns:1fr; }
+  .steps-container { flex-direction:column; gap:32px; }
+  .steps-line { display:none; }
+}
+@media(max-width:640px){
+  .hero { padding:40px 20px !important; }
+  .hero-title { font-size:2rem; }
+  .features-grid { grid-template-columns:1fr; }
+  .section-title { font-size:1.6rem; }
+}
+</style>
+{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="text-center mb-5">
-            <h1 class="display-4">🎯 提示词教学平台</h1>
-            <p class="lead text-muted">掌握AI对话的艺术，提升你的提示词编写能力</p>
-        </div>
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid-dots"></div>
 
-        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab">
-                    🎮 实战练习
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="learning-tab" data-bs-toggle="tab" data-bs-target="#learning" type="button" role="tab">
-                    📚 学习中心
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="about-tab" data-bs-toggle="tab" data-bs-target="#about" type="button" role="tab">
-                    ℹ️ 关于我们
-                </button>
-            </li>
-        </ul>
+  <!-- Left: 文字 -->
+  <div class="hero-left">
+    <div class="hero-badge"><span class="badge-dot"></span> 面向教师与学生的 AI 提示词教学平台</div>
+    <h1 class="hero-title">让每个人都能<br><span class="highlight">写好提示词</span></h1>
+    <p class="hero-desc">专为教育场景打造。学生通过实战练习掌握 AI 对话技巧，教师通过数据看板追踪每个学生的成长轨迹。从入门到精通，我们陪你每一步。</p>
 
-        <div class="tab-content mt-4" id="mainTabContent">
-            <div class="tab-pane fade show active" id="practice" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h3>🎮 实战练习</h3>
-                        <p>输入你的提示词，获得专业的多维度评分和改进建议</p>
-                        {% if user.is_authenticated %}
-                            <a href="{% url 'practice:practice' %}" class="btn btn-primary btn-lg">开始练习</a>
-                        {% else %}
-                            <p class="text-muted">请先<a href="{% url 'users:login' %}">登录</a>或<a href="{% url 'users:register' %}">注册</a>以开始练习</p>
-                        {% endif %}
-                        
-                        <hr>
-                        <h5>功能特点：</h5>
-                        <ul>
-                            <li>✅ 6维度智能评分系统（清晰度、完整性、结构化等）</li>
-                            <li>✅ AI驱动的个性化改进建议</li>
-                            <li>✅ 多场景支持（写作、编程、分析、创意等）</li>
-                            <li>✅ 练习历史记录与进度追踪</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="learning" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h3>📚 学习中心</h3>
-                        <p>从基础到高级，系统地学习提示词编写技巧</p>
-                        <a href="{% url 'learning:list' %}" class="btn btn-success btn-lg">开始学习</a>
-                        
-                        <hr>
-                        <h5>课程分类：</h5>
-                        <div class="row mt-3">
-                            <div class="col-md-3 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <h5>🌱 基础入门</h5>
-                                        <p class="small">了解提示词的基本概念和原则</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <h5>⚡ 进阶技巧</h5>
-                                        <p class="small">掌握高级技巧和最佳实践</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <h5>🚀 高级应用</h5>
-                                        <p class="small">复杂场景下的提示词设计</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-3 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-body text-center">
-                                        <h5>💡 最佳实践</h5>
-                                        <p class="small">行业案例和实战经验分享</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="tab-pane fade" id="about" role="tabpanel">
-                <div class="card">
-                    <div class="card-body">
-                        <h3>ℹ️ 关于我们</h3>
-                        <p>提示词教学平台是一个专注于帮助用户提升AI对话技能的在线学习平台。</p>
-                        
-                        <h5 class="mt-4">我们的使命</h5>
-                        <p>让每个人都能掌握与AI高效沟通的技巧，充分发挥人工智能的潜力。</p>
-                        
-                        <h5 class="mt-4">核心功能</h5>
-                        <ul>
-                            <li><strong>智能评估系统</strong>：基于大语言模型的多维度评分</li>
-                            <li><strong>个性化反馈</strong>：针对每个提示词提供具体改进建议</li>
-                            <li><strong>系统化学习</strong>：从入门到精通的完整课程体系</li>
-                            <li><strong>实践驱动</strong>：通过大量练习巩固所学知识</li>
-                        </ul>
-                        
-                        <h5 class="mt-4">技术栈</h5>
-                        <p>Django + PostgreSQL + 大语言模型 API</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="hero-btns">
+      {% if user.is_authenticated %}
+        <a href="{% url 'practice:practice' %}" class="btn-hero btn-hero-solid">开始练习 →</a>
+        {% if user.is_teacher or user.is_staff %}
+        <a href="/teacher/workspace" class="btn-hero btn-hero-outline">教师工作台</a>
+        {% endif %}
+      {% else %}
+        <a href="{% url 'users:register' %}" class="btn-hero btn-hero-solid">开始学习 →</a>
+        <a href="{% url 'users:login' %}" class="btn-hero btn-hero-outline">教师工作台</a>
+      {% endif %}
     </div>
-</div>
+
+    <div class="hero-stats">
+      <div class="hero-stat-item"><h3>6</h3><p>AI 智能评分体系</p></div>
+      <div class="hero-stat-item"><h3>10+</h3><p>实战场景模板</p></div>
+      <div class="hero-stat-item"><h3>实时</h3><p>个性化改进建议</p></div>
+    </div>
+  </div>
+
+  <!-- Right: 词云图片 -->
+  <div class="hero-visual">
+    <img src="{% static 'images/wordcloud_1780799598266.svg' %}" alt="写提示词的痛点词云" />
+  </div>
+</section>
+
+<!-- ========== FOR WHO — 为谁而建 ========== -->
+<section class="for-whom" id="for-whom">
+  <div class="section-header">
+    <span class="section-tag">🎯 为谁而建</span>
+    <h2 class="section-title">面向两类核心用户</h2>
+  </div>
+  <div class="for-whom-grid">
+    <!-- 学生卡片 -->
+    <div class="role-card">
+      <div class="role-card-header">
+        <div class="role-icon role-icon-student">👨‍🎓</div>
+        <h3>学生 / 学习者</h3>
+      </div>
+      <p>通过系统化的练习和即时反馈，快速掌握提示词编写技能。</p>
+      <ul class="role-list">
+        <li>多维度智能评分（清晰度、完整性、结构化）</li>
+        <li>AI 实时生成个性化改进建议</li>
+        <li>从基础到高级的渐进式课程体系</li>
+        <li>练习历史记录与成长轨迹可视化</li>
+      </ul>
+    </div>
+    <!-- 教师卡片 -->
+    <div class="role-card">
+      <div class="role-card-header">
+        <div class="role-icon role-icon-teacher">👩‍🏫</div>
+        <h3>教师 / 管理员</h3>
+      </div>
+      <p>全面掌握班级学习进度，精准指导每位学生。</p>
+      <ul class="role-list">
+        <li>实时查看全班学生的练习情况与成绩分布</li>
+        <li>识别学习困难学生，及时预警干预</li>
+        <li>自定义课程内容与评价标准</li>
+        <li>导出分析报告，辅助教学决策</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FEATURES — 六大特色能力 ========== -->
+<section class="features" id="features">
+  <div class="section-header">
+    <span class="section-tag">✨ 核心功能</span>
+    <h2 class="section-title">六大特色能力</h2>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,#3B82F6,#60A5FA)">⚔️</div>
+      <h3>实战练习</h3>
+      <p>输入你的提示词，获得专业的多维度评分和改进建议。AI 实时分析清晰度、完整性、结构化等关键指标。</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,#10B981,#34D399)">📚</div>
+      <h3>系统化课程</h3>
+      <p>从基础到高级的系统化课程体系，覆盖多种应用场景。</p>
+      <div class="feature-tags">
+        <span class="tag">基础入门</span><span class="tag">进阶技巧</span><span class="tag">高级应用</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,#8B5CF6,#A78BFA)">📊</div>
+      <h3>数据分析</h3>
+      <p>可视化追踪学习进度和成绩趋势，发现薄弱环节。</p>
+      <div class="feature-tags">
+        <span class="tag">成绩趋势</span><span class="tag">能力雷达图</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,#F59E0B,#FBBF24)">🎯</div>
+      <h3>多场景模板</h3>
+      <p>覆盖写作创作、编程开发、数据分析、创意设计等主流场景，每个场景都有针对性的评估标准。</p>
+      <div class="feature-tags">
+        <span class="tag">写作/内容创作</span><span class="tag">编程辅助</span><span class="tag">数据分析</span>
+        <span class="tag">翻译润色</span><span class="tag">营销文案</span><span class="tag">学术研究</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,var(--primary),#F59E0B)">🏫</div>
+      <h3>教师工作台</h3>
+      <p>专为教师设计的班级管理面板，实时查看每个学生的学习状态和完成情况。</p>
+      <div class="feature-tags">
+        <span class="tag">班级概览</span><span class="tag">学生详情</span><span class="tag">预警提醒</span>
+      </div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon" style="background:linear-gradient(135deg,#EF4444,#F87171)">⚡</div>
+      <h3>智能预警</h3>
+      <p>自动识别学习进度落后或长期未活跃的学生，帮助教师及时关注。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== WHY US — 为什么选择我们 ========== -->
+<section class="why-us">
+  <div class="section-header">
+    <span class="section-tag">💡 我们的优势</span>
+    <h2 class="section-title">为什么选择我们</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-num">1</div>
+      <div><h3>教育优先的设计理念</h3><p>每一个功能都围绕真实的教学场景设计，而非简单堆砌技术。</p></div>
+    </div>
+    <div class="why-card">
+      <div class="why-num">2</div>
+      <div><h3>深度集成的 AI 能力</h3><p>不只是调用 API，而是将大语言模型的能力深度融合到评分、反馈、建议的每个环节。</p></div>
+    </div>
+    <div class="why-card">
+      <div class="why-num">3</div>
+      <div><h3>教管一体</h3><p>学生端专注练习与提升，教师端聚焦管理与指导，两端数据打通形成闭环。</p></div>
+    </div>
+    <div class="why-card">
+      <div class="why-num">4</div>
+      <div><h3>数据驱动的持续改进</h3><p>基于真实的练习数据不断优化评分模型和教学内容。</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== HOW IT WORKS — 使用流程 ========== -->
+<section class="how-it-works">
+  <div class="section-header">
+    <span class="section-tag">🚀 使用流程</span>
+    <h2 class="section-title">三步开始你的提升之旅</h2>
+  </div>
+  <div class="steps-container">
+    <div class="steps-line"></div>
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>选择场景</h3>
+      <p>从写作、编程、分析等多种应用场景中选择一个开始</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>提交提示词</h3>
+      <p>输入你编写的提示词，系统会进行多维度的专业评估</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>持续改进</h3>
+      <p>根据反馈反复优化，查看历史记录追踪进步轨迹</p>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CTA 行动号召 ========== -->
+<section class="cta-section">
+  <h2>准备好提升你的提示词技能了吗？</h2>
+  <p>加入我们的平台，开启系统化学习之旅</p>
+  {% if user.is_authenticated %}
+    <a href="{% url 'practice:practice' %}" class="btn-cta">进入练习 →</a>
+  {% else %}
+    <a href="{% url 'users:register' %}" class="btn-cta">立即注册 →</a>
+  {% endif %}
+</section>
 {% endblock %}

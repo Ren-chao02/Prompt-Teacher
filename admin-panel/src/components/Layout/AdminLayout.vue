@@ -105,9 +105,9 @@
                 :src="authStore.user?.avatar || undefined"
                 class="user-avatar"
               >
-                {{ authStore.user?.username?.charAt(0)?.toUpperCase() }}
+                {{ (authStore.user?.real_name || authStore.user?.username || 'U').charAt(0).toUpperCase() }}
               </el-avatar>
-              <span class="username">{{ authStore.user?.username }}</span>
+              <span class="username">{{ authStore.user?.real_name || authStore.user?.username }}</span>
               <el-tag size="small" :type="getRoleTagType(authStore.role)" class="role-tag">
                 {{ getRoleLabel(authStore.role) }}
               </el-tag>
@@ -155,6 +155,7 @@ import { useAuthStore } from '@/store/modules/auth'
 import {
   ChatDotRound,
   Odometer,
+  Monitor,
   Reading,
   Aim,
   DataAnalysis,
@@ -209,7 +210,7 @@ const currentRole = computed(() => authStore.role)
 // 欢迎语（按时段+角色）
 const greetingText = computed(() => {
   const hour = new Date().getHours()
-  const username = authStore.user?.username || '同学'
+  const username = authStore.user?.real_name || authStore.user?.username || '同学'
   let timeGreeting = '你好'
   if (hour < 6) timeGreeting = '夜深了，注意休息'
   else if (hour < 11) timeGreeting = '早上好'
@@ -232,6 +233,12 @@ const menuList = ref([
     title: '仪表盘',
     icon: Odometer,
     roles: ['admin', 'teacher', 'student']
+  },
+  {
+    path: '/teacher/workspace',
+    title: '我的工作台',
+    icon: Monitor,
+    roles: ['admin', 'teacher']
   },
   {
     path: '/learning',

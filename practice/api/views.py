@@ -1,12 +1,13 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.db.models import Count, Avg, Sum, Max, Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 
-from ..models import PracticeScenario, PracticeTopic, PracticeRecord
+from users.permissions import IsAdmin, IsAuthenticated
+
+from ..models import PracticeScenario, PracticeTopic, PracticeRecord, LLMConfig
 from .serializers import (
     PracticeScenarioListSerializer,
     PracticeScenarioDetailSerializer,
@@ -20,6 +21,9 @@ from .serializers import (
     PracticeRecordDetailSerializer,
     PracticeRecordCreateSerializer,
     PracticeRecordUpdateSerializer,
+    LLMConfigSerializer,
+    LLMConfigCreateSerializer,
+    LLMConfigTestSerializer,
 )
 
 
@@ -56,9 +60,9 @@ class PracticeScenarioViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsAuthenticated(), IsAdminUser()]
-        if self.action in ['publish', 'reorder', 'statistics']:
-            return [IsAuthenticated(), IsAdminUser()]
+            return [IsAuthenticated(), IsAdmin()]
+        if self.action in ['publish', 'reorder']:
+            return [IsAuthenticated(), IsAdmin()]
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -243,7 +247,7 @@ class PracticeTopicViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            return [IsAuthenticated(), IsAdminUser()]
+            return [IsAuthenticated(), IsAdmin()]
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -360,8 +364,8 @@ class PracticeRecordViewSet(viewsets.ModelViewSet):
     def get_permissions(self):
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
             return [IsAuthenticated()]
-        if self.action in ['export', 'statistics']:
-            return [IsAuthenticated(), IsAdminUser()]
+        if self.action == 'export':
+            return [IsAuthenticated(), IsAdmin()]
         return [IsAuthenticated()]
 
     def get_queryset(self):
@@ -419,9 +423,19 @@ class PracticeRecordViewSet(viewsets.ModelViewSet):
             'code': 200,
             'message': 'success',
             'data': {
-                'results': serializer.data,
-                'count': queryset.count()
-            }
+                    'results': serializer.data,
+                    'count': queryset.count()
+                }
+            })
+
+    def retrieve(self, request, *args, **kwargs):
+        """返回记录详情（包装响应格式）"""
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response({
+            'code': 200,
+            'message': 'success',
+            'data': serializer.data
         })
 
     @action(detail=False, methods=['get'])
@@ -551,3 +565,68 @@ class PracticeRecordViewSet(viewsets.ModelViewSet):
             'data': export_data,
             'message': f'导出{len(export_data)}条记录'
         })
+
+
+class LLMConfigViewSet(viewsets.ModelViewSet):
+    """
+    用户自定义LLM模型配置管理
+
+    list: 列出当前用户的所有模型配置
+    retrieve: 获取单个配置详情
+    create: 创建新的模型配置
+    update: 更新配置
+    partial_update: 部分更新
+    destroy: 删除配置
+    set_default: 设为默认模型
+    test_connection: 测试API连接
+    my_configs: 获取当前用户的所有配置（前端列表用）
+    """
+
+    queryset = LLMConfig.objects.all()
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ['provider', 'is_active']
+
+    def get_serializer_class(self):
+        if self.action in ['create', 'update', 'partial_update']:
+            return LLMConfigCreateSerializer
+        if self.action == 'test_connection':
+            return LLMConfigTestSerializer
+        return LLMConfigSerializer
+
+    def get_permissions(self):
+        return [IsAuthenticated()]
+
+    def get_queryset(self):
+        return super().get_queryset().filter(owner=self.request.user).order_by('-is_default', '-created_at')
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    @action(detail=False, methods=['get'])
+    def my_configs(self, request):
+        configs = self.get_queryset().filter(is_active=True)
+        serializer = self.get_serializer(configs, many=True)
+        return Response({'code': 200, 'data': serializer.data})
+
+    @action(detail=True, methods=['post'])
+    def set_default(self, request, pk=None):
+        config = self.get_object()
+        config.is_default = True
+        config.save()
+        return Response({'code': 200, 'message': f'已将 {config.name} 设为默认模型'})
+
+    @action(detail=False, methods=['post'])
+    def test_connection(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        from ..services.llm_service import llm_service
+        result = llm_service.test_connection(
+            api_url=serializer.validated_data['api_url'],
+            api_key=serializer.validated_data.get('api_key', ''),
+            model_id=serializer.validated_data['model_id']
+        )
+
+        if result['success']:
+            return Response({'code': 200, 'data': result})
+        return Response({'code': 400, 'error': result['error']}, status=status.HTTP_400_BAD_REQUEST)

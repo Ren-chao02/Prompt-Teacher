@@ -4,6 +4,7 @@
 
 {% block extra_css %}
 <style>
+body { background:#FFFBF7 !important; }
 .history-container {
     max-width: 1600px;
     margin: 0 auto;
@@ -34,14 +35,11 @@
     background: white;
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 4px solid #00A4F4;
-    transition: transform 0.3s ease;
+transition: transform 0.3s ease;
 }
 
 .stat-card:hover {
     transform: translateY(-3px);
-    box-shadow: 0 4px 12px rgba(0,164,244,0.15);
 }
 
 .stat-icon {
@@ -52,7 +50,7 @@
 .stat-value {
     font-size: 2rem;
     font-weight: 700;
-    color: #00A4F4;
+    color: #E07B39;
     margin-bottom: 5px;
 }
 
@@ -65,8 +63,7 @@
     background: white;
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
+margin-bottom: 25px;
 }
 
 .filter-title {
@@ -110,8 +107,7 @@
 .filter-select:focus,
 .filter-input:focus {
     outline: none;
-    border-color: #00A4F4;
-    box-shadow: 0 0 0 3px rgba(0,164,244,0.1);
+    border-color: #E07B39;
 }
 
 .filter-actions {
@@ -133,13 +129,12 @@
 }
 
 .btn-primary-filter {
-    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    background: linear-gradient(135deg, #E07B39, #D4A574);
     color: white;
 }
 
 .btn-primary-filter:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,164,244,0.3);
 }
 
 .btn-reset {
@@ -162,8 +157,6 @@
     background: white;
     border-radius: 12px;
     padding: 20px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-left: 4px solid #00D4AA;
 }
 
 .scenario-header {
@@ -183,7 +176,7 @@
 }
 
 .scenario-count-badge {
-    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    background: linear-gradient(135deg, #E07B39, #D4A574);
     color: white;
     padding: 5px 14px;
     border-radius: 20px;
@@ -208,7 +201,7 @@
 .metric-value {
     font-size: 1.3rem;
     font-weight: 700;
-    color: #00A4F4;
+    color: #E07B39;
     margin-bottom: 3px;
 }
 
@@ -221,8 +214,7 @@
     background: white;
     border-radius: 12px;
     padding: 25px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    overflow-x: auto;
+overflow-x: auto;
 }
 
 .table-header {
@@ -248,7 +240,7 @@
 }
 
 .records-table thead {
-    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    background: linear-gradient(135deg, #E07B39, #D4A574);
     color: white;
 }
 
@@ -307,8 +299,8 @@
     border-radius: 20px;
     font-weight: 600;
     font-size: 0.95rem;
-    background: linear-gradient(135deg, #E3F2FD, #E0F7FA);
-    color: #00A4F4;
+    background: linear-gradient(135deg, #FFF4EB, #FFE8D6);
+    color: #E07B39;
 }
 
 .duration-badge {
@@ -330,7 +322,7 @@
 
 .action-btn {
     padding: 8px 18px;
-    background: linear-gradient(135deg, #00A4F4, #00D4AA);
+    background: linear-gradient(135deg, #E07B39, #D4A574);
     color: white;
     border: none;
     border-radius: 6px;
@@ -344,7 +336,6 @@
 
 .action-btn:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,164,244,0.3);
 }
 
 .empty-state {

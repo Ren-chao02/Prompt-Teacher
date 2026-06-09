@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>提示词教学平台 - 设计预览 v2</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  /* 暖色调色系 — 温馨教育风 */
+  --primary: #E07B39;
+  --primary-dark: #C96A2D;
+  --primary-light: #F09A58;
+  --secondary: #3B82F6;
+  --accent: #EC8B7A;
+  --accent-green: #4DA167;
+  --accent-teal: #2BA891;
+  --bg: #FFFBF7;
+  --bg-subtle: #FFF4EB;
+  --bg-warm: #FFF0E3;
+  --fg: #2D241C;
+  --fg-muted: #7A6F64;
+  --fg-light: #A89B8C;
+  --border: #EDE4DB;
+  --border-warm: #E8DDD2;
+  --card-shadow: 0 2px 12px rgba(180,140,90,.08), 0 1px 4px rgba(0,0,0,.03);
+  --card-hover-shadow: 0 8px 28px rgba(224,123,57,.12), 0 2px 10px rgba(0,0,0,.04);
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 22px;
+  --radius-xl: 30px;
+}
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans SC', -apple-system, sans-serif;
+  color: var(--fg); background: var(--bg);
+  line-height: 1.65; overflow-x:hidden;
+}
+h1,h2,h3,h4 { font-family: 'Poppins', 'Noto Sans SC', sans-serif; font-weight: 600; line-height: 1.25; }
+a { text-decoration:none; color:inherit; transition:.25s ease; }
+
+/* ========== NAVBAR ========== */
+.navbar {
+  position: fixed; top:0; left:0; right:0; z-index:1000;
+  display:flex; align-items:center; justify-content:space-between;
+  padding: 0 48px; height:72px;
+  background: rgba(255,251,247,.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(237,228,219,.6);
+}
+.navbar-brand {
+  display:flex; align-items:center; gap:11px;
+  font-size:1.28rem; font-weight:700; letter-spacing:-.02em; color:var(--fg);
+}
+.navbar-brand .logo-icon {
+  width:38px; height:38px; border-radius:11px;
+  background: linear-gradient(135deg, var(--primary), var(--primary-light));
+  display:flex; align-items:center; justify-content:center;
+  color:#fff; font-size:19px; font-weight:800;
+  box-shadow: 0 2px 10px rgba(224,123,57,.3);
+}
+.nav-links { display:flex; gap:6px; list-style:none; }
+.nav-links a {
+  padding:9px 20px; border-radius:999px; font-size:.9rem; font-weight:500;
+  color:var(--fg-muted); transition:all .22s ease;
+}
+.nav-links a:hover, .nav-links a.active { color:var(--primary); background:rgba(224,123,57,.07); }
+.nav-actions { display:flex; gap:10px; align-items:center; }
+.btn {
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding:10px 24px; border-radius:999px; font-size:.9rem; font-weight:600;
+  cursor:pointer; border:none; transition:all .25s cubic-bezier(.4,0,.2,1);
+  white-space:nowrap;
+}
+.btn-primary {
+  background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color:#fff; box-shadow:0 2px 14px rgba(224,123,57,.35);
+}
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(224,123,57,.42); }
+.btn-outline {
+  background:transparent; color:var(--fg);
+  border:1.5px solid var(--border);
+}
+.btn-outline:hover { border-color:var(--primary); color:var(--primary); background:rgba(224,123,57,.04); }
+.btn-lg { padding:15px 34px; font-size:1rem; }
+
+/* ========== HERO SECTION ========== */
+.hero {
+  position:relative; min-height:100vh; display:flex;
+  align-items:center; padding:37px 197px 40px; overflow:hidden;
+}
+.hero-bg {
+  position:absolute; inset:0; z-index:-2;
+  background:
+    radial-gradient(ellipse 80% 55% at 15% 35%, rgba(224,123,57,.13) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 45% at 80% 25%, rgba(236,139,122,.09) 0%, transparent 65%),
+    radial-gradient(ellipse 50% 40% at 55% 80%, rgba(77,161,103,.06) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 45% 60%, rgba(245,158,11,.05) 0%, transparent 55%);
+}
+/* 温馨装饰圆点 */
+.hero-decor {
+  position:absolute; inset:0; z-index:-1;
+  overflow:hidden;
+}
+.hero-decor::before {
+  content:''; position:absolute; width:420px; height:420px;
+  border-radius:50%; top:-100px; right:10%;
+  background:radial-gradient(circle, rgba(224,123,57,.07), transparent 70%);
+  animation:float-slow 12s ease-in-out infinite;
+}
+.hero-decor::after {
+  content:''; position:absolute; width:300px; height:300px;
+  border-radius:50%; bottom:5%; left:5%;
+  background:radial-gradient(circle, rgba(77,161,103,.05), transparent 70%);
+  animation:float-slow 10s ease-in-out infinite reverse;
+}
+
+.hero-content { max-width:640px; }
+.hero-badge {
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 18px 7px 10px; border-radius:999px;
+  background:rgba(224,123,57,.08); border:1px solid rgba(224,123,57,.14);
+  font-size:.84rem; font-weight:500; color:var(--primary-dark);
+  margin-bottom:28px; animation:fadeUp .6s ease both;
+}
+.hero-badge .dot { width:8px; height:8px; border-radius:50%; background:var(--primary); animation:pulse-dot 2.2s infinite; }
+.hero h1 {
+  font-size:clamp(2.4rem, 5vw, 3.6rem); font-weight:700;
+  letter-spacing:-.03em; margin-bottom:22px;
+  animation:fadeUp .7s ease .1s both;
+  color:var(--fg);
+}
+.hero h1 .gradient-text {
+  background:linear-gradient(135deg, var(--primary), var(--accent));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+}
+.hero-desc {
+  font-size:1.12rem; color:var(--fg-muted); max-width:520px;
+  margin-bottom:36px; line-height:1.75;
+  animation:fadeUp .8s ease .2s both;
+}
+.hero-cta { display:flex; gap:14px; flex-wrap:wrap; animation:fadeUp .9s ease .3s both; }
+.hero-stats {
+  display:flex; gap:44px; margin-top:52px; padding-top:30px;
+  border-top:1px solid var(--border-warm);
+  animation:fadeUp 1s ease .4s both;
+}
+.hero-stat-item h3 { font-size:1.75rem; font-weight:700; color:var(--fg); }
+.hero-stat-item p { font-size:.85rem; color:var(--fg-light); margin-top:2px; }
+
+/* Hero right side — SVG 词云（外部文件，去黑底） */
+.hero-visual {
+  position:relative; margin-left:161px; width:809px; height:742px; flex-shrink:0;
+  animation:float-in 1s ease .5s both;
+  display:flex; align-items:center; justify-content:center;
+  /* background:#FFF4EB; */
+  border-radius:var(--radius-xl);
+  overflow:hidden;
+}
+.hero-visual img {
+  width:100%; height:auto;
+  mix-blend-mode:multiply;
+  opacity:.93;
+  animation:cloud-img-float 7s ease-in-out infinite;
+}
+@keyframes cloud-img-float {
+  0%, 100% { transform:translateY(0) rotate(0deg); }
+  50% { transform:translateY(-10px) rotate(0.3deg); }
+}
+
+/* ========== WHO IS THIS FOR — 双角色介绍 ========== */
+.for-whom { padding:90px 48px; background:var(--bg-subtle); }
+.for-whom-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns: 1fr 1fr; gap:28px; }
+.role-card {
+  background:var(--bg); border-radius:var(--radius-lg);
+  border:1px solid var(--border); padding:36px 32px;
+  transition:all .3s cubic-bezier(.4,0,.2,1);
+  position:relative; overflow:hidden;
+}
+.role-card::before {
+  content:''; position:absolute; top:0; left:0; right:0; height:4px;
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+}
+.role-card.student::before { background:linear-gradient(90deg, var(--secondary), #60A5FA); }
+.role-card.teacher::before { background:linear-gradient(90deg, var(--primary), var(--primary-light)); }
+.role-card:hover { transform:translateY(-5px); box-shadow:var(--card-hover-shadow); }
+.role-icon {
+  width:56px; height:56px; border-radius:16px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:26px; margin-bottom:18px;
+}
+.role-icon.stu { background:rgba(59,130,246,.1); color:var(--secondary); }
+.role-icon.tea { background:rgba(224,123,57,.1); color:var(--primary); }
+.role-card h3 { font-size:1.25rem; margin-bottom:12px; }
+.role-card p { font-size:.93rem; color:var(--fg-muted); line-height:1.7; margin-bottom:18px; }
+.role-features { list-style:none; }
+.role-features li {
+  display:flex; align-items:flex-start; gap:10px; padding:6px 0;
+  font-size:.9rem; color:var(--fg);
+}
+.role-features li::before {
+  content:'✓'; flex-shrink:0; font-weight:700; font-size:.85rem;
+  margin-top:2px;
+}
+.role-card.student .role-features li::before { color:var(--secondary); }
+.role-card.teacher .role-features li::before { color:var(--primary); }
+
+/* ========== FEATURES SECTION — 统一卡片网格 ========== */
+.features { padding:100px 48px; max-width:1200px; margin:0 auto; }
+.section-header { text-align:center; margin-bottom:60px; }
+.section-tag {
+  display:inline-block; padding:6px 18px; border-radius:999px;
+  background:rgba(224,123,57,.07); color:var(--primary-dark);
+  font-size:.83rem; font-weight:600; letter-spacing:.02em;
+  margin-bottom:16px;
+}
+.section-header h2 { font-size:clamp(1.75rem, 3.5vw, 2.5rem); margin-bottom:14px; }
+.section-header p { font-size:1.05rem; color:var(--fg-muted); max-width:580px; margin:0 auto; line-height:1.7; }
+
+/* 统一大小卡片 — 3列布局 */
+.feature-grid {
+  display:grid; grid-template-columns: repeat(3, 1fr); gap:22px;
+}
+.feature-card {
+  background:var(--bg); border-radius:var(--radius-lg);
+  border:1px solid var(--border); padding:30px 26px;
+  transition: all .3s cubic-bezier(.4,0,.2,1);
+  position:relative; overflow:hidden;
+  display:flex; flex-direction:column;
+}
+.feature-card:hover { transform:translateY(-5px); box-shadow:var(--card-hover-shadow); border-color:rgba(224,123,57,.2); }
+.feature-icon {
+  width:52px; height:52px; border-radius:14px;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; margin-bottom:18px; flex-shrink:0;
+}
+.fi-orange { background:rgba(224,123,57,.1); color:var(--primary); }
+.fi-blue { background:rgba(59,130,246,.1); color:var(--secondary); }
+.fi-green { background:rgba(77,161,103,.1); color:var(--accent-green); }
+.fi-teal { background:rgba(43,168,145,.1); color:var(--accent-teal); }
+.fi-pink { background:rgba(236,139,122,.1); color:var(--accent); }
+.fi-purple { background:rgba(139,92,246,.1); color:#8B5CF6; }
+.feature-card h3 { font-size:1.13rem; margin-bottom:10px; }
+.feature-card p { font-size:.9rem; color:var(--fg-muted); line-height:1.68; flex:1; }
+.feature-tags { display:flex; flex-wrap:wrap; gap:7px; margin-top:16px; }
+.feature-tag {
+  padding:4px 12px; border-radius:999px; font-size:.76rem; font-weight:500;
+  background:var(--bg-subtle); color:var(--fg-muted); border:1px solid var(--border-warm);
+}
+
+/* ========== WHY US — 平台特色 ========== */
+.why-us { padding:90px 48px; background:linear-gradient(180deg, var(--bg-subtle), var(--bg)); }
+.why-grid { max-width:1100px; margin:0 auto; display:grid; grid-template-columns: repeat(4, 1fr); gap:24px; }
+.why-item {
+  text-align:center; padding:32px 20px;
+  background:var(--bg); border-radius:var(--radius-lg);
+  border:1px solid var(--border);
+  transition:all .3s ease;
+}
+.why-item:hover { transform:translateY(-4px); box-shadow:var(--card-hover-shadow); }
+.why-num {
+  width:46px; height:46px; border-radius:50%;
+  background:linear-gradient(135deg, var(--primary), var(--primary-light));
+  color:#fff; font-weight:700; font-size:1.1rem;
+  display:inline-flex; align-items:center; justify-content:center;
+  margin-bottom:16px; box-shadow:0 2px 10px rgba(224,123,57,.25);
+}
+.why-item h4 { font-size:1.02rem; margin-bottom:8px; }
+.why-item p { font-size:.86rem; color:var(--fg-muted); line-height:1.6; }
+
+/* ========== HOW IT WORKS ========== */
+.how-it-works { padding:80px 48px; background:var(--bg); }
+.steps-container { max-width:900px; margin:0 auto; display:flex; gap:24px; }
+.step {
+  flex:1; text-align:center; padding:32px 24px;
+  background:var(--bg-subtle); border-radius:var(--radius-lg);
+  border:1px solid var(--border-warm); position:relative;
+  transition:all .3s ease;
+}
+.step:hover { transform:translateY(-4px); box-shadow:var(--card-hover-shadow); background:var(--bg); }
+.step-num {
+  width:46px; height:46px; border-radius:50%;
+  background:linear-gradient(135deg, var(--primary), var(--primary-light));
+  color:#fff; font-weight:700; font-size:1.1rem;
+  display:inline-flex; align-items:center; justify-content:center;
+  margin-bottom:16px; box-shadow:0 2px 10px rgba(224,123,57,.25);
+}
+.step h4 { font-size:1.04rem; margin-bottom:8px; }
+.step p { font-size:.87rem; color:var(--fg-muted); line-height:1.6; }
+.step-arrow {
+  position:absolute; top:50%; right:-16px; transform:translateY(-50%);
+  color:var(--border); font-size:1.4rem; z-index:1;
+}
+
+/* ========== CTA BANNER ========== */
+.cta-banner {
+  padding:72px 48px; text-align:center;
+  background:
+    linear-gradient(135deg, rgba(224,123,57,.95), rgba(201,106,45,.95)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='.04'/%3E%3C/svg%3E");
+  color:#fff;
+}
+.cta-banner h2 { font-size:clamp(1.6rem, 3vw, 2.4rem); margin-bottom:14px; color:#fff; }
+.cta-banner p { font-size:1.08rem; opacity:.88; max-width:520px; margin:0 auto 32px; line-height:1.7; }
+.btn-white {
+  background:#fff; color:var(--primary-dark);
+  box-shadow:0 2px 14px rgba(0,0,0,.12);
+  font-weight:700;
+}
+.btn-white:hover { transform:translateY(-2px); box-shadow:0 6px 24px rgba(0,0,0,.18); }
+
+/* ========== FOOTER ========== */
+.footer { padding:40px 48px; text-align:center; border-top:1px solid var(--border-warm); }
+.footer p { color:var(--fg-light); font-size:.84rem; }
+
+/* ========== ANIMATIONS ========== */
+@keyframes fadeUp {
+  from { opacity:0; transform:translateY(24px); }
+  to { opacity:1; transform:translateY(0); }
+}
+@keyframes float-in {
+  from { opacity:0; transform:translateX(40px); }
+  to { opacity:1; transform:translateX(0); }
+}
+@keyframes float-card {
+  0%, 100% { transform:translateY(0); }
+  50% { transform:translateY(-8px); }
+}
+@keyframes pulse-dot {
+  0%, 100% { opacity:1; transform:scale(1); }
+  50% { opacity:.5; transform:scale(1.3); }
+}
+@keyframes float-slow {
+  0%, 100% { transform:translateY(0) scale(1); }
+  50% { transform:translateY(-20px) scale(1.03); }
+}
+@keyframes illu-glow {
+  0% { opacity:.6; transform:scale(1) rotate(0deg); }
+  100% { opacity:1; transform:scale(1.05) rotate(2deg); }
+}
+@keyframes draw-in {
+  from { stroke-dashoffset: 400; }
+  to { stroke-dashoffset: 0; }
+}
+@keyframes cloud-float {
+  0%, 100% { transform:translate(0, 0) rotate(0deg); }
+  25% { transform:translate(var(--dx1,4px), var(--dy1,-6px)) rotate(var(--dr1,0.5deg)); }
+  50% { transform:translate(var(--dx2,-3px), var(--dy2,4px)) rotate(var(--dr2,-0.5deg)); }
+  75% { transform:translate(var(--dx3,5px), var(--dy3,2px)) rotate(var(--dr3,0.3deg)); }
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width:1024px) {
+  .hero { padding:100px 32px 60px; flex-direction:column; }
+  .hero-visual { display:none; }
+  .feature-grid { grid-template-columns: 1fr 1fr; }
+  .for-whom-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: repeat(2, 1fr); }
+  .steps-container { flex-direction:column; }
+  .step-arrow { display:none; }
+  .navbar { padding:0 24px; }
+  .features, .for-whom, .how-it-works, .why-us, .cta-banner { padding-left:24px; padding-right:24px; }
+}
+@media (max-width:640px) {
+  .navbar { padding:0 16px; height:64px; }
+  .nav-links { display:none; }
+  .hero { padding:96px 20px 48px; min-height:auto; }
+  .hero-stats { gap:28px; flex-wrap:wrap; }
+  .feature-grid { grid-template-columns: 1fr; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+  .stats-row { flex-wrap:wrap; gap:28px; }
+}
+
+.preview-watermark {
+  position:fixed; bottom:20px; right:20px; z-index:9999;
+  padding:8px 18px; border-radius:999px;
+  background:rgba(45,36,28,.7); color:#fff; font-size:.78rem;
+  font-weight:500; backdrop-filter:blur(10px);
+  pointer-events:none;
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="navbar">
+  <a href="#" class="navbar-brand">
+    <div class="logo-icon">P</div>
+    提示词教学平台
+  </a>
+  <ul class="nav-links">
+    <li><a href="#" class="active">首页</a></li>
+    <li><a href="#">实战练习</a></li>
+    <li><a href="#">学习中心</a></li>
+    <li><a href="#">关于我们</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn btn-outline">登录</button>
+    <button class="btn btn-primary">免费注册</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-decor"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span class="dot"></span> 面向教师与学生的 AI 提示词教学平台</div>
+    <h1>让每个人都能<br><span class="gradient-text">写好提示词</span></h1>
+    <p class="hero-desc">专为教育场景打造。学生通过实战练习掌握 AI 对话技巧，教师通过数据看板追踪每个学生的成长轨迹。从入门到精通，我们陪你每一步。</p>
+    <div class="hero-cta">
+      <button class="btn btn-primary btn-lg">开始学习 &rarr;</button>
+      <button class="btn btn-outline btn-lg">教师工作台</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat-item">
+        <h3>6<span style="font-size:1rem;color:var(--fg-light)"> 维度</span></h3>
+        <p>AI 智能评分体系</p>
+      </div>
+      <div class="hero-stat-item">
+        <h3>10+</h3>
+        <p>实战场景模板</p>
+      </div>
+      <div class="hero-stat-item">
+        <h3>实时</h3>
+        <p>个性化反馈建议</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hero Visual: 用户自己的 SVG 词云（新文件） -->
+  <div class="hero-visual">
+    <img src="/core/static/images/wordcloud_1780799598266.svg" alt="写提示词的痛点词云" />
+  </div>
+</section>
+
+<!-- FOR WHOM — 双角色介绍 -->
+<section class="for-whom">
+  <div class="section-header">
+    <div class="section-tag">为谁而建</div>
+    <h2>连接教与学的桥梁</h2>
+    <p>无论你是想提升 AI 技能的学生，还是希望高效管理班级的教师，这里都有适合你的工具</p>
+  </div>
+  <div class="for-whom-grid">
+    <!-- 学生卡片 -->
+    <div class="role-card student">
+      <div class="role-icon stu">&#x1F393;</div>
+      <h3>面向学生</h3>
+      <p>通过系统化的练习和即时反馈，循序渐进地掌握提示词编写技巧，培养 AI 时代的核心能力。</p>
+      <ul class="role-features">
+        <li>多维度智能评分，精准定位薄弱环节</li>
+        <li>AI 实时反馈，每次提交都有改进方向</li>
+        <li>丰富的场景模板，覆盖写作、编程、分析等</li>
+        <li>可视化成长曲线，见证自己的进步</li>
+      </ul>
+    </div>
+    <!-- 教师卡片 -->
+    <div class="role-card teacher">
+      <div class="role-icon tea">&#x1F9D1;&#x200D;&#x1F3EB;</div>
+      <h3>面向教师</h3>
+      <p>一站式班级管理工具，实时了解每个学生的学习状态，让教学更高效、更有针对性。</p>
+      <ul class="role-features">
+        <li>专属工作台，一览全班学习概况</li>
+        <li>每个学生的详细成绩与趋势分析</li>
+        <li>自动预警机制，及时发现需要关注的学生</li>
+        <li>支持批量管理班级与学生账号</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES — 统一大小卡片 -->
+<section class="features">
+  <div class="section-header">
+    <div class="section-tag">核心功能</div>
+    <h2>六大特色能力</h2>
+    <p>从练习到管理，从评分到追踪，构建完整的教学闭环</p>
+  </div>
+
+  <div class="feature-grid">
+    <!-- 卡片 1 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-orange">&#x2694;</div>
+      <h3>实战练习场</h3>
+      <p>输入提示词即可获得专业评分。AI 从清晰度、完整性、结构化等 6 个维度全面评估。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">6 维度评分</span>
+        <span class="feature-tag">即时反馈</span>
+      </div>
+    </div>
+    <!-- 卡片 2 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-blue">&#x1F4DA;</div>
+      <h3>系统化课程</h3>
+      <p>从基础语法到高级技巧的完整课程体系，配合实战练习巩固所学知识。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">基础入门</span>
+        <span class="feature-tag">进阶技巧</span>
+        <span class="feature-tag">高级应用</span>
+      </div>
+    </div>
+    <!-- 卡片 3 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-teal">&#x1F4CA;</div>
+      <h3>数据分析</h3>
+      <p>可视化展示成绩趋势和能力雷达图，帮助学生和教师直观了解进步情况。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">成绩趋势</span>
+        <span class="feature-tag">能力雷达图</span>
+      </div>
+    </div>
+    <!-- 卡片 4 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-green">&#x1F3AF;</div>
+      <h3>多场景模板</h3>
+      <p>覆盖写作创作、编程辅助、数据分析、翻译润色等 10+ 主流应用场景。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">写作</span>
+        <span class="feature-tag">编程</span>
+        <span class="feature-tag">分析</span>
+        <span class="feature-tag">翻译</span>
+      </div>
+    </div>
+    <!-- 卡片 5 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-pink">&#x1F4BC;</div>
+      <h3>教师工作台</h3>
+      <p>教师专属仪表盘，查看班级概览、学生详情、预警信息，一键掌握全局。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">班级总览</span>
+        <span class="feature-tag">学生追踪</span>
+        <span class="feature-tag">预警提醒</span>
+      </div>
+    </div>
+    <!-- 卡片 6 -->
+    <div class="feature-card">
+      <div class="feature-icon fi-purple">&#x2728;</div>
+      <h3>智能预警系统</h3>
+      <p>自动识别成绩落后或长期未活跃的学生，帮助教师及时干预和辅导。</p>
+      <div class="feature-tags">
+        <span class="feature-tag">成绩预警</span>
+        <span class="feature-tag">活跃度监控</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY US — 平台特色 -->
+<section class="why-us">
+  <div class="section-header">
+    <div class="section-tag">我们的优势</div>
+    <h2>为什么选择我们</h2>
+  </div>
+  <div class="why-grid">
+    <div class="why-item">
+      <div class="why-num">1</div>
+      <h4>教育优先设计</h4>
+      <p>不是通用工具，而是为课堂教学和学习路径专门打造的平台</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">2</div>
+      <h4>AI 深度集成</h4>
+      <p>6 维度智能评分 + 个性化改进建议，每次练习都有收获</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">3</div>
+      <h4>教管一体</h4>
+      <p>教师端和学生端无缝衔接，形成完整的教学闭环</p>
+    </div>
+    <div class="why-item">
+      <div class="why-num">4</div>
+      <h4>数据驱动</h4>
+      <p>可视化报表让学习效果看得见，让教学决策有依据</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-it-works">
+  <div class="section-header">
+    <div class="section-tag">使用流程</div>
+    <h2>三步开启学习之旅</h2>
+  </div>
+  <div class="steps-container">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h4>选择场景</h4>
+      <p>从丰富的场景库中选择你想要练习的方向</p>
+    </div>
+    <div class="step-arrow">&rarr;</div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h4>提交 & 反馈</h4>
+      <p>编写并提交提示词，获得 AI 即时评分和建议</p>
+    </div>
+    <div class="step-arrow">&rarr;</div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h4>迭代成长</h4>
+      <p>根据反馈持续优化，追踪你的成长轨迹</p>
+    </div>
+  </div>
+</section>
+
+<!-- CTA BANNER -->
+<section class="cta-banner">
+  <h2>准备好开启 AI 提示词学习之旅了吗？</h2>
+  <p>无论你是学生还是教师，立即加入，体验全新的 AI 教学方式</p>
+  <button class="btn btn-white btn-lg">免费开始使用 &rarr;</button>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p>&copy; 2024 提示词教学平台 | 所有权利保留 | powered by yet</p>
+</footer>
+
+<div class="preview-watermark">Design Preview v2.8</div>
+
+</body>
+</html>

@@ -24,7 +24,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@l+!1-=71n^=p12ef18r5g3_k3
 
 DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*' if DEBUG else 'localhost,127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -159,7 +159,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'users.api.pagination.SafePageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
@@ -189,3 +189,9 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
 }
+
+# 自定义认证后端 - 支持学号/工号登录
+AUTHENTICATION_BACKENDS = [
+    'users.auth_backends.RoleBasedAuthBackend',
+    'django.contrib.auth.backends.ModelBackend',  # 兜底
+]

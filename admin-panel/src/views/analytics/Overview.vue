@@ -2,15 +2,39 @@
   <div class="analytics-container">
     <!-- 页面标题 -->
     <div class="page-header">
-      <h2>📊 数据分析中心</h2>
-      <el-select v-model="period" placeholder="选择时间范围" style="width: 150px">
+      <h2>{{ isTeacher ? '📊 我的班级数据分析' : '📊 数据分析中心' }}</h2>
+      <div class="header-actions">
+        <el-select
+          v-if="isTeacher && myClasses.length > 0"
+          v-model="selectedClassId"
+          placeholder="全部班级"
+          clearable
+          style="width: 180px; margin-right: 10px;"
+        >
+          <el-option
+            v-for="cls in myClasses"
+            :key="cls.id"
+            :label="`${cls.name} (${cls.student_count}人)`"
+            :value="cls.id"
+          />
+        </el-select>
+        <el-select v-model="period" placeholder="选择时间范围" style="width: 150px">
         <el-option label="最近7天" value="7d" />
         <el-option label="最近30天" value="30d" />
         <el-option label="最近90天" value="90d" />
       </el-select>
+      </div>
     </div>
 
-    <el-row :gutter="20" v-loading="loading">
+    <el-empty
+      v-if="isTeacher && myClasses.length === 0 && !loading"
+      description="您暂未管理任何班级和学生"
+      :image-size="120"
+    >
+      <el-button type="primary">联系管理员分配班级</el-button>
+    </el-empty>
+
+    <el-row :gutter="20" v-loading="loading" v-else>
       <!-- 核心指标卡片 -->
       <el-col :span="6" v-for="(stat, index) in coreStats" :key="index">
         <el-card shadow="hover" class="stat-card">
@@ -66,7 +90,7 @@
       <el-col :span="12" v-if="showUserRanking">
         <el-card shadow="hover" class="chart-card">
           <template #header>
-            <span>🏆 优秀学员排行</span>
+            <span>🏆 {{ isTeacher ? '班级学员排行' : '优秀学员排行' }}</span>
           </template>
           <el-table
             :data="topUsers"
@@ -112,14 +136,30 @@ import { useAuthStore } from '@/store/modules/auth'
 import LineChart from '@/components/charts/LineChart.vue'
 import BarChart from '@/components/charts/BarChart.vue'
 import { getAnalyticsOverview } from '@/api/analytics'
+import { getMyClasses } from '@/api/auth'
 
 const authStore = useAuthStore()
 const loading = ref(false)
 const period = ref('30d')
 const overviewData = ref({})
 
+const isTeacher = computed(() => ['admin', 'teacher'].includes(authStore.userInfo?.role || ''))
 const userRole = computed(() => authStore.userInfo?.role || '')
 const showUserRanking = computed(() => ['admin', 'teacher'].includes(userRole.value))
+
+// 班级选择器
+const myClasses = ref([])
+const selectedClassId = ref(null)
+
+const loadMyClasses = async () => {
+  if (!isTeacher.value) return
+  try {
+    const res = await getMyClasses()
+    if (res.code === 200) {
+      myClasses.value = res.data || []
+    }
+  } catch (e) { /* 静默 */ }
+}
 
 const coreStats = computed(() => [
   {
@@ -166,7 +206,11 @@ const topUsers = computed(() => overviewData.value.top_users || [])
 const fetchOverview = async () => {
   loading.value = true
   try {
-    const res = await getAnalyticsOverview({ period: period.value })
+    const params = { period: period.value }
+    if (selectedClassId.value) {
+      params.class_id = selectedClassId.value
+    }
+    const res = await getAnalyticsOverview(params)
     if (res.code === 200) {
       overviewData.value = res.data
     }
@@ -177,11 +221,12 @@ const fetchOverview = async () => {
   }
 }
 
-watch(period, () => {
+watch([period, selectedClassId], () => {
   fetchOverview()
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await loadMyClasses()
   fetchOverview()
 })
 </script>
@@ -201,6 +246,11 @@ onMounted(() => {
     margin: 0;
     font-size: 24px;
     color: #303133;
+  }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
   }
 }
 

@@ -2,6 +2,27 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 
 
+class ClassInfo(models.Model):
+    """班级模型"""
+    name = models.CharField(max_length=50, unique=True, verbose_name='班级名称')
+    grade = models.CharField(max_length=10, verbose_name='年级')
+    major = models.CharField(max_length=50, verbose_name='专业')
+    class_number = models.CharField(max_length=10, verbose_name='班号')
+    description = models.CharField(max_length=200, blank=True, default='', verbose_name='备注')
+
+    class Meta:
+        verbose_name = '班级'
+        verbose_name_plural = '班级'
+        ordering = ['grade', 'major', 'class_number']
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def student_count(self):
+        return self.students.count()
+
+
 class UserProfile(AbstractUser):
     """增强用户模型 - 支持教育场景的三级权限体系"""
 
@@ -65,6 +86,40 @@ class UserProfile(AbstractUser):
         help_text='仅学生角色需要选择'
     )
 
+    real_name = models.CharField(
+        max_length=50,
+        default='',
+        blank=True,
+        verbose_name='真实姓名',
+        help_text='必填'
+    )
+
+    employee_id = models.CharField(
+        max_length=20,
+        unique=True,
+        null=True,
+        blank=True,
+        default=None,
+        verbose_name='工号',
+        help_text='仅教师角色需要填写，全局唯一'
+    )
+
+    class_info = models.ForeignKey(
+        ClassInfo,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='students',
+        verbose_name='班级',
+        help_text='学生所属班级'
+    )
+
+    must_change_password = models.BooleanField(
+        default=False,
+        verbose_name='需修改密码',
+        help_text='首次登录后强制修改密码'
+    )
+
     created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='创建时间'
@@ -76,9 +131,13 @@ class UserProfile(AbstractUser):
         ordering = ['-date_joined']
 
     def __str__(self):
-        if self.role == 'student' and self.student_id:
-            return f'{self.student_id} - {self.get_full_name()}'
-        return self.get_full_name() or self.username
+        if self.real_name:
+            if self.role == 'student' and self.student_id:
+                return f'{self.real_name} ({self.student_id})'
+            elif self.role == 'teacher' and self.employee_id:
+                return f'{self.real_name} ({self.employee_id})'
+            return self.real_name
+        return self.username
 
     @property
     def is_admin(self):

@@ -38,6 +38,12 @@
           </el-select>
         </el-form-item>
 
+        <el-form-item label="班级">
+          <el-select v-model="searchForm.class_info" placeholder="全部班级" clearable style="width: 160px">
+            <el-option v-for="c in classList" :key="c.id" :label="c.name" :value="c.id" />
+          </el-select>
+        </el-form-item>
+
         <el-form-item>
           <el-button type="primary" @click="handleSearch">
             <el-icon><Search /></el-icon> 搜索
@@ -54,6 +60,9 @@
       <div class="left">
         <el-button type="primary" @click="handleCreate" v-if="isAdmin">
           <el-icon><Plus /></el-icon> 新建用户
+        </el-button>
+        <el-button type="success" @click="importVisible = true" v-if="isAdmin">
+          <el-icon><Upload /></el-icon> 批量导入
         </el-button>
         <el-button 
           type="danger" 
@@ -87,10 +96,10 @@
           <template #default="{ row }">
             <div class="user-info-cell">
               <el-avatar :size="40" :src="row.avatar || undefined">
-                {{ row.username?.charAt(0)?.toUpperCase() }}
+                {{ (row.real_name || row.username)?.charAt(0)?.toUpperCase() }}
               </el-avatar>
               <div class="info">
-                <div class="username">{{ row.username }}</div>
+                <div class="username">{{ row.real_name || row.username }}</div>
                 <div class="email">{{ row.email }}</div>
               </div>
             </div>
@@ -105,13 +114,17 @@
           </template>
         </el-table-column>
 
-        <el-table-column prop="student_id" label="学号" width="120" align="center">
+        <el-table-column label="标识符" width="130" align="center">
           <template #default="{ row }">
-            {{ row.student_id || '-' }}
+            <span v-if="row.student_id">{{ row.student_id }}</span>
+            <span v-else-if="row.employee_id">{{ row.employee_id }}</span>
+            <span v-else style="color:#999">-</span>
           </template>
         </el-table-column>
 
-        <el-table-column prop="major" label="专业" width="150" show-overflow-tooltip />
+        <el-table-column prop="class_name" label="班级" width="160" show-overflow-tooltip>
+          <template #default="{ row }">{{ row.class_name || '-' }}</template>
+        </el-table-column>
 
         <el-table-column prop="is_active" label="状态" width="80" align="center">
           <template #default="{ row }">
@@ -184,17 +197,24 @@
       :user="resetPasswordUser"
       @success="handleResetPasswordSuccess"
     />
+
+    <!-- 批量导入对话框 -->
+    <BatchImportDialog
+      v-model:visible="importVisible"
+      @success="fetchUserList"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, computed, onMounted } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { Search, Refresh, Plus, Delete } from '@element-plus/icons-vue'
+import { Search, Refresh, Plus, Delete, Upload } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/store/modules/auth'
-import { getUserList, deleteUser, batchDeleteUsers, changeUserStatus } from '@/api/user'
+import { getUserList, deleteUser, batchDeleteUsers, changeUserStatus, getClassList } from '@/api/user'
 import UserDialog from './components/UserDialog.vue'
 import ResetPasswordDialog from './components/ResetPasswordDialog.vue'
+import BatchImportDialog from './components/BatchImportDialog.vue'
 
 const authStore = useAuthStore()
 const isAdmin = computed(() => authStore.isAdmin)
@@ -208,7 +228,8 @@ const selectedIds = ref([])
 const searchForm = reactive({
   search: '',
   role: '',
-  is_active: ''
+  is_active: '',
+  class_info: ''
 })
 
 const pagination = reactive({
@@ -216,6 +237,9 @@ const pagination = reactive({
   pageSize: 10,
   total: 0
 })
+
+const importVisible = ref(false)
+const classList = ref([])
 
 const dialogVisible = ref(false)
 const isEditMode = ref(false)
@@ -226,7 +250,17 @@ const resetPasswordUser = ref(null)
 
 onMounted(() => {
   fetchUserList()
+  loadClassList()
 })
+
+async function loadClassList() {
+  try {
+    const res = await getClassList({ page_size: 200 })
+    // 兼容分页格式 {count, results} 和包装格式 {data: {results}}
+    const payload = res.data || res
+    classList.value = payload.results || (Array.isArray(payload) ? payload : [])
+  } catch (e) { console.error(e) }
+}
 
 async function fetchUserList() {
   loading.value = true
@@ -240,8 +274,16 @@ async function fetchUserList() {
     }
     
     const res = await getUserList(params)
-    tableData.value = res.data.results || res.data
-    pagination.total = res.data.count || (res.data.results ? res.data.count : res.data.length)
+    // DRF 分页格式: { count, results, next, previous }
+    // 非分页/空结果: [] 或 { count: 0, results: [] }
+    const payload = res.data
+    if (payload && typeof payload === 'object' && 'results' in payload) {
+      tableData.value = payload.results || []
+      pagination.total = payload.count || 0
+    } else {
+      tableData.value = Array.isArray(payload) ? payload : []
+      pagination.total = tableData.value.length
+    }
   } catch (error) {
     console.error('获取用户列表失败:', error)
   } finally {
@@ -258,7 +300,8 @@ function handleReset() {
   Object.assign(searchForm, {
     search: '',
     role: '',
-    is_active: ''
+    is_active: '',
+    class_info: ''
   })
   handleSearch()
 }

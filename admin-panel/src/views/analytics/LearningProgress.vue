@@ -2,8 +2,22 @@
   <div class="learning-progress-container">
     <!-- 页面标题 -->
     <div class="page-header">
-      <h2>📚 学习进度分析</h2>
+      <h2>{{ isTeacher ? '📚 我班学习情况' : '📚 学习进度分析' }}</h2>
       <div class="header-actions">
+        <el-select
+          v-if="isTeacher && myClasses.length > 0"
+          v-model="selectedClassId"
+          placeholder="全部班级"
+          clearable
+          style="width: 180px; margin-right: 10px;"
+        >
+          <el-option
+            v-for="cls in myClasses"
+            :key="cls.id"
+            :label="`${cls.name} (${cls.student_count}人)`"
+            :value="cls.id"
+          />
+        </el-select>
         <el-select v-model="period" placeholder="时间范围" style="width: 150px; margin-right: 10px;">
           <el-option label="最近7天" value="7d" />
           <el-option label="最近30天" value="30d" />
@@ -19,7 +33,15 @@
       </div>
     </div>
 
-    <el-row :gutter="20" v-loading="loading">
+    <el-empty
+      v-if="isTeacher && myClasses.length === 0 && !loading"
+      description="您暂未管理任何班级和学生"
+      :image-size="120"
+    >
+      <el-button type="primary">联系管理员分配班级</el-button>
+    </el-empty>
+
+    <el-row :gutter="20" v-loading="loading" v-else>
       <!-- 学习时间线 -->
       <el-col :span="16">
         <el-card shadow="hover" class="chart-card">
@@ -38,19 +60,19 @@
               <div style="font-size: 24px; font-weight: bold; color: #409EFF;">
                 {{ totalReadMinutes }} 分钟
               </div>
-              <div style="color: #909399; font-size: 13px;">总阅读时长</div>
+              <div style="color: #909399; font-size: 13px;">{{ isTeacher ? '班级总阅读时长' : '总阅读时长' }}</div>
             </div>
             <div>
               <div style="font-size: 24px; font-weight: bold; color: #67C23A;">
                 {{ completedCount }}
               </div>
-              <div style="color: #909399; font-size: 13px;">完成数量</div>
+              <div style="color: #909399; font-size: 13px;">{{ isTeacher ? '班级完成人数' : '完成数量' }}</div>
             </div>
             <div>
               <div style="font-size: 24px; font-weight: bold; color: #E6A23C;">
                 {{ avgDailyMinutes }} 分钟
               </div>
-              <div style="color: #909399; font-size: 13px;">日均学习</div>
+              <div style="color: #909399; font-size: 13px;">{{ isTeacher ? '班级人均日均' : '日均学习' }}</div>
             </div>
           </div>
         </el-card>
@@ -186,14 +208,33 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useAuthStore } from '@/store/modules/auth'
 import LineChart from '@/components/charts/LineChart.vue'
 import PieChart from '@/components/charts/PieChart.vue'
 import { getLearningProgress } from '@/api/analytics'
+import { getMyClasses } from '@/api/auth'
 
+const authStore = useAuthStore()
 const loading = ref(false)
 const period = ref('30d')
 const categoryFilter = ref('')
 const progressData = ref({})
+
+const isTeacher = computed(() => ['admin', 'teacher'].includes(authStore.userInfo?.role || ''))
+
+// 班级选择器
+const myClasses = ref([])
+const selectedClassId = ref(null)
+
+const loadMyClasses = async () => {
+  if (!isTeacher.value) return
+  try {
+    const res = await getMyClasses()
+    if (res.code === 200) {
+      myClasses.value = res.data || []
+    }
+  } catch (e) { /* 静默 */ }
+}
 
 const totalReadMinutes = computed(() => {
   const minutes = progressData.value.timeline?.read_minutes || []
@@ -250,7 +291,10 @@ const fetchProgress = async () => {
     if (categoryFilter.value) {
       params.category = categoryFilter.value
     }
-    
+    if (selectedClassId.value) {
+      params.class_id = selectedClassId.value
+    }
+
     const res = await getLearningProgress(params)
     if (res.code === 200) {
       progressData.value = res.data
@@ -262,11 +306,12 @@ const fetchProgress = async () => {
   }
 }
 
-watch([period, categoryFilter], () => {
+watch([period, categoryFilter, selectedClassId], () => {
   fetchProgress()
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await loadMyClasses()
   fetchProgress()
 })
 </script>

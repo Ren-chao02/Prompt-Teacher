@@ -2,8 +2,22 @@
   <div class="practice-statistics-container">
     <!-- 页面标题 -->
     <div class="page-header">
-      <h2>✏️ 练习成绩统计分析</h2>
+      <h2>{{ isTeacher ? '✏️ 我的班级练习成绩' : '✏️ 练习成绩统计分析' }}</h2>
       <div class="header-actions">
+        <el-select
+          v-if="isTeacher && myClasses.length > 0"
+          v-model="selectedClassId"
+          placeholder="全部班级"
+          clearable
+          style="width: 180px; margin-right: 10px;"
+        >
+          <el-option
+            v-for="cls in myClasses"
+            :key="cls.id"
+            :label="`${cls.name} (${cls.student_count}人)`"
+            :value="cls.id"
+          />
+        </el-select>
         <el-select v-model="period" placeholder="时间范围" style="width: 150px; margin-right: 10px;">
           <el-option label="最近7天" value="7d" />
           <el-option label="最近30天" value="30d" />
@@ -18,7 +32,15 @@
       </div>
     </div>
 
-    <el-row :gutter="20" v-loading="loading">
+    <el-empty
+      v-if="isTeacher && myClasses.length === 0 && !loading"
+      description="您暂未管理任何班级和学生"
+      :image-size="120"
+    >
+      <el-button type="primary">联系管理员分配班级</el-button>
+    </el-empty>
+
+    <el-row :gutter="20" v-loading="loading" v-else>
       <!-- 核心指标卡片 -->
       <el-col :span="6" v-for="(stat, index) in coreStats" :key="index">
         <el-card shadow="hover" class="stat-card">
@@ -175,7 +197,7 @@
         <el-card shadow="hover" class="chart-card">
           <template #header>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span>🏆 练习排行榜 TOP20</span>
+              <span>🏆 {{ isTeacher ? '班级练习排行榜' : '练习排行榜' }} TOP20</span>
               <el-radio-group v-model="rankingType" size="small">
                 <el-radio-button label="score">按分数</el-radio-button>
                 <el-radio-button label="count">按次数</el-radio-button>
@@ -297,6 +319,7 @@ import LineChart from '@/components/charts/LineChart.vue'
 import BarChart from '@/components/charts/BarChart.vue'
 import PieChart from '@/components/charts/PieChart.vue'
 import { getPracticeStatistics } from '@/api/analytics'
+import { getMyClasses } from '@/api/auth'
 
 const authStore = useAuthStore()
 const loading = ref(false)
@@ -305,8 +328,23 @@ const scoreLevelFilter = ref('')
 const rankingType = ref('score')
 const statisticsData = ref({})
 
+const isTeacher = computed(() => ['admin', 'teacher'].includes(authStore.userInfo?.role || ''))
 const userRole = computed(() => authStore.userInfo?.role || '')
 const showRanking = computed(() => ['admin', 'teacher'].includes(userRole.value))
+
+// 班级选择器
+const myClasses = ref([])
+const selectedClassId = ref(null)
+
+const loadMyClasses = async () => {
+  if (!isTeacher.value) return
+  try {
+    const res = await getMyClasses()
+    if (res.code === 200) {
+      myClasses.value = res.data || []
+    }
+  } catch (e) { /* 静默 */ }
+}
 
 const coreStats = computed(() => [
   {
@@ -455,7 +493,10 @@ const fetchStatistics = async () => {
     if (scoreLevelFilter.value) {
       params.score_level = scoreLevelFilter.value
     }
-    
+    if (selectedClassId.value) {
+      params.class_id = selectedClassId.value
+    }
+
     const res = await getPracticeStatistics(params)
     if (res.code === 200) {
       statisticsData.value = res.data
@@ -467,11 +508,12 @@ const fetchStatistics = async () => {
   }
 }
 
-watch([period, scoreLevelFilter], () => {
+watch([period, scoreLevelFilter, selectedClassId], () => {
   fetchStatistics()
 })
 
-onMounted(() => {
+onMounted(async () => {
+  await loadMyClasses()
   fetchStatistics()
 })
 </script>

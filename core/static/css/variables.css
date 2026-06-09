@@ -8,10 +8,10 @@
   /* ============================================
      1. 主题色系统 (Brand Colors)
      ============================================ */
-  --color-primary: rgb(0, 164, 244);
-  --color-primary-light: #33B8F7;
-  --color-primary-dark: #0089CC;
-  --color-primary-gradient: linear-gradient(135deg, var(--color-primary) 0%, #0096d6 100%);
+  --color-primary: #E07B39;
+  --color-primary-light: #EB9A5C;
+  --color-primary-dark: #C96A2D;
+  --color-primary-gradient: linear-gradient(135deg, #E07B39 0%, #D4A574 100%);
   
   /* ============================================
      2. 语义色 (Semantic Colors)
@@ -72,17 +72,7 @@
   --radius-full: 50%;
   
   /* ============================================
-     8. 阴影系统 (Shadow System)
-     ============================================ */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.15);
-  --shadow-xl: 0 8px 16px rgba(0, 0, 0, 0.15);
-  --shadow-primary: 0 2px 8px rgba(0, 164, 244, 0.3);
-  --shadow-primary-hover: 0 4px 12px rgba(0, 164, 244, 0.5);
-  
-  /* ============================================
-     9. 字体系统 (Typography)
+     8. 过渡动画 (Transitions)
      ============================================ */
   --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-family-mono: 'Consolas', 'Monaco', monospace;
@@ -160,12 +150,10 @@
   border-radius: var(--radius-sm);
   font-weight: var(--font-weight-medium);
   transition: all var(--transition-normal);
-  box-shadow: var(--shadow-primary);
 }
 
 .btn-brand:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-primary-hover);
   color: white;
 }
 
@@ -176,5 +164,4 @@
 
 .card-hover-lift:hover {
   transform: translateY(-5px);
-  box-shadow: var(--shadow-xl);
 }

@@ -140,6 +140,7 @@ export function getMyRecords(params) {
 export function getPracticeStatistics() {
   return request({
     url: '/practice/records/statistics/',
-    method: 'get'
+    method: 'get',
+    showError: false
   })
 }

@@ -25,11 +25,20 @@ def login_view(request):
             user = form.get_user()
             login(request, user)
             messages.success(request, '登录成功！')
-            next_url = request.GET.get('next', '/')
+            # 管理员跳转到管理后台，其他用户跳转到首页
+            if user.is_staff or user.is_superuser:
+                next_url = request.GET.get('next', '/admin/')
+            else:
+                next_url = request.GET.get('next', '/')
             return redirect(next_url)
     else:
         form = CustomAuthenticationForm()
     return render(request, 'login.html', {'form': form})
+
+
+@login_required
+def profile_view(request):
+    return render(request, 'profile.html', {'user': request.user})
 
 
 @login_required

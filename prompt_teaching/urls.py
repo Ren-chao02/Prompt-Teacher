@@ -12,6 +12,9 @@ urlpatterns = [
     # Vue管理后台SPA（接管 /admin/ 路径）
     # 必须放在API路由之前，避免冲突
     re_path(r'^admin/(?P<path>.*)$', admin_spa_view, name='admin-spa'),
+
+    # 兼容直接访问 /teacher/* 等Vue路由（无 /admin/ 前缀的情况）
+    re_path(r'^(?P<path>teacher/.*)$', admin_spa_view),
     
     # 前台页面
     path('', home_view, name='home'),

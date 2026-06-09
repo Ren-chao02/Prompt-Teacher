@@ -251,3 +251,71 @@ class PracticeRecord(models.Model):
             self.completed_at = timezone.now()
         
         super().save(*args, **kwargs)
+
+
+class LLMConfig(models.Model):
+    """用户自定义LLM模型配置"""
+
+    PROVIDER_CHOICES = [
+        ('openai', 'OpenAI'),
+        ('ollama', 'Ollama本地'),
+        ('qwen', '通义千问'),
+        ('deepseek', 'DeepSeek'),
+        ('custom', '自定义'),
+    ]
+
+    PROVIDER_API_TEMPLATES = {
+        'openai': 'https://api.openai.com/v1/chat/completions',
+        'ollama': 'http://localhost:11434/v1/chat/completions',
+        'qwen': 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions',
+        'deepseek': 'https://api.deepseek.com/chat/completions',
+    }
+
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='llm_configs',
+        verbose_name='所属用户'
+    )
+    name = models.CharField(max_length=100, verbose_name='显示名称')
+    provider = models.CharField(
+        max_length=50,
+        choices=PROVIDER_CHOICES,
+        default='custom',
+        verbose_name='提供商'
+    )
+    api_url = models.CharField(max_length=500, verbose_name='API地址')
+    api_key = models.CharField(max_length=500, blank=True, verbose_name='API密钥')
+    model_id = models.CharField(max_length=100, verbose_name='模型标识符')
+    is_default = models.BooleanField(default=False, verbose_name='默认模型')
+    is_active = models.BooleanField(default=True, verbose_name='启用')
+
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='创建时间')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='更新时间')
+
+    class Meta:
+        ordering = ['-is_default', '-created_at']
+        verbose_name = 'LLM模型配置'
+        verbose_name_plural = 'LLM模型配置'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['owner', 'is_default'],
+                condition=models.Q(is_default=True),
+                name='unique_default_llm_per_user'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.owner.username} - {self.name} ({self.model_id})'
+
+    def save(self, *args, **kwargs):
+        if self.is_default:
+            LLMConfig.objects.filter(
+                owner=self.owner,
+                is_default=True
+            ).exclude(pk=self.pk).update(is_default=False)
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_provider_template(cls, provider):
+        return cls.PROVIDER_API_TEMPLATES.get(provider, '')

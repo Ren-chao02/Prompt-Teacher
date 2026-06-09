@@ -2,86 +2,120 @@
 
 {% block title %}注册 - 提示词教学平台{% endblock %}
 
+{% block extra_css %}
+<style>
+body { background: #FFFBF7 !important; }
+.auth-wrapper {
+  min-height: calc(100vh - 180px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px;
+}
+.auth-card {
+  width: 100%; max-width: 480px;
+  background: white; border-radius: 16px;
+overflow: hidden;
+}
+.auth-header {
+  background: linear-gradient(135deg, #E07B39 0%, #D4A574 100%);
+  padding: 32px 28px 24px; text-align: center; color: white;
+}
+.auth-header h4 { font-size: 1.3rem; font-weight: 700; margin-bottom: 4px; }
+.auth-header p { font-size: .9rem; opacity: .85; margin: 0; }
+.auth-body { padding: 28px 28px 8px; }
+.form-label { font-weight: 600; color: #2D2520; font-size: .92rem; }
+.form-control {
+  border: 2px solid #EDE4DB; border-radius: 10px; padding: 10px 14px;
+  font-size: .95rem; transition: all .25s ease;
+}
+.form-control:focus {
+  border-color: #E07B39;
+outline: none;
+}
+.form-text { color: #9CA3AF; font-size: .82rem; margin-top: 4px; }
+.btn-auth {
+  background: linear-gradient(135deg, #E07B39, #C96A2D);
+  color: white; border: none; border-radius: 10px;
+  padding: 12px; font-size: 1rem; font-weight: 600;
+  width: 100%; cursor: pointer; transition: all .3s ease;
+}
+.btn-auth:hover { transform: translateY(-1px);
+color: white; }
+.auth-footer { text-align: center; padding: 16px 28px 24px; }
+.auth-footer a { color: #E07B39; text-decoration: none; font-weight: 500; }
+.auth-footer a:hover { text-decoration: underline; }
+.alert-danger { border-left: 4px solid #EF4444; border-radius: 8px; background: #FEF2F2; color: #991B1B; }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-6">
-        <div class="card shadow">
-            <div class="card-header bg-success text-white text-center">
-                <h4 class="mb-0">📝 用户注册</h4>
+<div class="auth-wrapper">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h4>📝 创建账号</h4>
+            <p>加入提示词教学平台</p>
+        </div>
+
+        <div class="auth-body">
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger mb-3">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
             </div>
-            <div class="card-body p-4">
-                {% if form.non_field_errors %}
-                <div class="alert alert-danger">
-                    {% for error in form.non_field_errors %}
-                        {{ error }}
-                    {% endfor %}
+            {% endif %}
+
+            <form method="post" id="registerForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="{{ form.username.id_for_label }}" class="form-label">用户名 <span style="color:#EF4444">*</span></label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div style="color:#EF4444;font-size:.82rem;margin-top:4px;">
+                            {% for error in form.username.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">至少3个字符，只允许字母、数字和@/./+/-/_</div>
                 </div>
-                {% endif %}
-                
-                <form method="post" id="registerForm">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label">用户名 <span class="text-danger">*</span></label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.username.errors %}
-                                    ⚠️ {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">至少3个字符，只允许字母、数字和@/./+/-/_</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.email.id_for_label }}" class="form-label">邮箱 <span class="text-danger">*</span></label>
-                        {{ form.email }}
-                        {% if form.email.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.email.errors %}
-                                    ⚠️ {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.password1.id_for_label }}" class="form-label">密码 <span class="text-danger">*</span></label>
-                        {{ form.password1 }}
-                        {% if form.password1.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.password1.errors %}
-                                    ⚠️ {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                        <div class="form-text">至少8个字符，不能太简单</div>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="{{ form.password2.id_for_label }}" class="form-label">确认密码 <span class="text-danger">*</span></label>
-                        {{ form.password2 }}
-                        {% if form.password2.errors %}
-                            <div class="text-danger small mt-1">
-                                {% for error in form.password2.errors %}
-                                    ⚠️ {{ error }}
-                                {% endfor %}
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="submit" class="btn btn-success btn-lg" id="registerBtn">
-                            注册
-                        </button>
-                    </div>
-                </form>
-                
-                <hr>
-                <p class="text-center mb-0">
-                    已有账号？<a href="{% url 'users:login' %}">立即登录</a>
-                </p>
-            </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.email.id_for_label }}" class="form-label">邮箱 <span style="color:#EF4444">*</span></label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div style="color:#EF4444;font-size:.82rem;margin-top:4px;">
+                            {% for error in form.email.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="mb-3">
+                    <label for="{{ form.password1.id_for_label }}" class="form-label">密码 <span style="color:#EF4444">*</span></label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div style="color:#EF4444;font-size:.82rem;margin-top:4px;">
+                            {% for error in form.password1.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                    <div class="form-text">至少8个字符，不能太简单</div>
+                </div>
+
+                <div class="mb-4">
+                    <label for="{{ form.password2.id_for_label }}" class="form-label">确认密码 <span style="color:#EF4444">*</span></label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div style="color:#EF4444;font-size:.82rem;margin-top:4px;">
+                            {% for error in form.password2.errors %}{{ error }}{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn btn-auth" id="registerBtn">
+                    注册
+                </button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            已有账号？<a href="{% url 'users:login' %}">立即登录</a>
         </div>
     </div>
 </div>
