@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 数据库
+  db:
+    image: postgres:14-alpine
+    container_name: prompt-teacher-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-prompt_teaching_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./deploy/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    networks:
+      - prompt-teacher-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Django 后端
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: prompt-teacher-backend
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - USE_POSTGRES=true
+      - DB_HOST=db
+      - DB_PORT=5432
+    volumes:
+      - ./media:/app/media
+      - ./staticfiles:/app/staticfiles
+      - ./data:/app/data
+    networks:
+      - prompt-teacher-network
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py collectstatic --noinput &&
+             gunicorn --bind 0.0.0.0:8001 --workers 3 --threads 2 prompt_teaching.wsgi:application"
+
+  # Vue 前端
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: prompt-teacher-frontend
+    restart: unless-stopped
+    networks:
+      - prompt-teacher-network
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+
+  # Ollama 本地 LLM（可选）
+  ollama:
+    image: ollama/ollama:latest
+    container_name: prompt-teacher-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - prompt-teacher-network
+    ports:
+      - "11434:11434"
+    profiles:
+      - ollama
+
+networks:
+  prompt-teacher-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  ollama_data:

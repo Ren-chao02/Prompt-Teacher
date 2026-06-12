@@ -77,16 +77,100 @@ Prompt Teacher/
 - Python >= 3.11
 - Node.js >= 20
 - PostgreSQL >= 14（可选，开发可用SQLite）
+- Docker & Docker Compose（生产环境推荐）
 - Ollama（本地LLM支持，可选）
 
-### 1. 克隆项目
+---
+
+## 🐳 一键部署（推荐）
+
+### 方式一：Docker 一键部署（生产环境推荐）
+
+**最简单的部署方式，适合生产环境！**
+
+#### 1. 克隆项目
 
 ```bash
 git clone <repository-url>
 cd "Prompt Teacher"
 ```
 
-### 2. 后端配置
+#### 2. 一键初始化
+
+```bash
+chmod +x deploy.sh
+./deploy.sh init
+```
+
+#### 3. 配置环境变量
+
+编辑 `.env` 文件，修改以下配置：
+
+```env
+# 必须修改的配置
+SECRET_KEY=your-random-secret-key-here
+DB_PASSWORD=your-secure-password
+
+# LLM 配置（选择其一）
+# 选项 1: Ollama 本地模型
+LLM_API_URL=http://ollama:11434/v1/chat/completions
+LLM_MODEL=qwen2.5:7b
+
+# 选项 2: OpenAI
+# LLM_API_URL=https://api.openai.com/v1/chat/completions
+# LLM_API_KEY=sk-your-api-key
+# LLM_MODEL=gpt-4
+
+# 选项 3: DeepSeek
+# LLM_API_URL=https://api.deepseek.com/v1/chat/completions
+# LLM_API_KEY=your-api-key
+# LLM_MODEL=deepseek-chat
+```
+
+#### 4. 启动服务
+
+```bash
+./deploy.sh start
+```
+
+#### 5. 创建管理员账号
+
+```bash
+./deploy.sh superuser
+```
+
+**🎉 部署完成！访问 http://localhost 即可使用！**
+
+---
+
+### 部署脚本命令
+
+```bash
+./deploy.sh init        # 初始化部署环境
+./deploy.sh start       # 启动所有服务
+./deploy.sh stop        # 停止所有服务
+./deploy.sh restart     # 重启所有服务
+./deploy.sh status      # 查看服务状态
+./deploy.sh logs        # 查看日志
+./deploy.sh backup      # 备份数据
+./deploy.sh restore <dir>  # 恢复数据
+./deploy.sh superuser   # 创建超级用户
+./deploy.sh shell       # 进入容器
+./deploy.sh update      # 更新服务
+```
+
+---
+
+### 方式二：手动部署（开发环境）
+
+#### 1. 克隆项目
+
+```bash
+git clone <repository-url>
+cd "Prompt Teacher"
+```
+
+#### 2. 后端配置
 
 ```bash
 # 创建虚拟环境
@@ -113,7 +197,7 @@ python manage.py createsuperuser
 python manage.py runserver 0.0.0.0:8001
 ```
 
-### 3. 前端配置
+#### 3. 前端配置
 
 ```bash
 cd admin-panel
@@ -128,7 +212,7 @@ npm run dev
 npm run build
 ```
 
-### 4. Ollama配置（可选）
+#### 4. Ollama配置（可选）
 
 ```bash
 # 安装 Ollama
@@ -225,3 +309,105 @@ MIT License
 如有问题或建议，请通过以下方式联系：
 - 邮箱：[your-email@example.com]
 - 项目地址：[repository-url]
+
+---
+
+## 🏭 生产环境部署
+
+### 安全建议
+
+1. **修改默认密码**：修改 `.env` 中的所有默认密码
+2. **使用强密码**：至少 16 位，包含大小写字母、数字和特殊字符
+3. **配置防火墙**：只开放必要端口（80, 443）
+4. **启用 HTTPS**：使用 Let's Encrypt 配置 SSL 证书
+
+### SSL/HTTPS 配置
+
+```bash
+# 安装 Certbot
+sudo apt-get install certbot python3-certbot-nginx
+
+# 获取证书
+sudo certbot --nginx -d your-domain.com
+
+# 自动续期
+sudo certbot renew --dry-run
+```
+
+### 性能优化
+
+1. **调整 Worker 数量**：根据 CPU 核心数调整 Gunicorn workers
+2. **启用缓存**：配置 Redis 缓存（可选）
+3. **CDN 加速**：使用 CDN 加速静态资源
+4. **数据库优化**：配置连接池和索引
+
+### 监控与备份
+
+```bash
+# 每天自动备份
+crontab -e
+
+# 添加以下行（每天凌晨 2 点备份）
+0 2 * * * cd /path/to/prompt-teacher && ./deploy.sh backup >> /var/log/backup.log 2>&1
+```
+
+### 高可用部署
+
+- 使用 **Docker Swarm** 或 **Kubernetes** 进行容器编排
+- 配置 **数据库主从复制**
+- 使用 **负载均衡器**（Nginx、HAProxy）
+
+---
+
+## ❓ 常见问题
+
+### 1. 端口被占用
+
+```bash
+# 查看端口占用
+netstat -tlnp | grep -E '80|5432|8001'
+
+# 修改 docker-compose.yml 中的端口映射
+```
+
+### 2. 数据库连接失败
+
+```bash
+# 检查数据库容器状态
+docker ps | grep prompt-teacher-db
+
+# 查看数据库日志
+./deploy.sh logs db
+```
+
+### 3. 前端无法访问后端 API
+
+- 检查 Nginx 配置：[deploy/nginx.conf](deploy/nginx.conf)
+- 检查后端服务状态：`./deploy.sh status`
+- 查看后端日志：`./deploy.sh logs backend`
+
+### 4. LLM 模型无法连接
+
+- **Ollama**：确保 Ollama 容器已启动，`./deploy.sh start` 时添加 `--profile ollama`
+- **OpenAI/DeepSeek**：检查 API Key 是否正确，网络是否可访问
+
+### 5. 数据迁移问题
+
+```bash
+# 进入后端容器
+./deploy.sh shell backend
+
+# 手动执行迁移
+python manage.py migrate
+
+# 检查迁移状态
+python manage.py showmigrations
+```
+
+---
+
+## 📚 更多文档
+
+- [部署详细指南](deploy/README.md)
+- [API 文档](http://localhost/api/docs/)
+- [项目技术方案](提示词教学网站%20—%20技术方案与项目规划%20🚀.md)
