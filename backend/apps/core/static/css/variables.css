@@ -1,0 +1,167 @@
+/* ============================================
+   Prompt Teacher Design System - CSS Variables
+   Version: 1.0.0
+   Description: 统一的设计令牌系统，解决硬编码颜色问题
+   ============================================ */
+
+:root {
+  /* ============================================
+     1. 主题色系统 (Brand Colors)
+     ============================================ */
+  --color-primary: #E07B39;
+  --color-primary-light: #EB9A5C;
+  --color-primary-dark: #C96A2D;
+  --color-primary-gradient: linear-gradient(135deg, #E07B39 0%, #D4A574 100%);
+  
+  /* ============================================
+     2. 语义色 (Semantic Colors)
+     ============================================ */
+  --color-success: #10B981;
+  --color-success-light: #E8F5E9;
+  --color-warning: #F59E0B;
+  --color-warning-light: #FFF3E0;
+  --color-danger: #EF4444;
+  --color-danger-light: #FCE4EC;
+  --color-info: #3B82F6;
+  
+  /* ============================================
+     3. 中性色 (Neutral Colors)
+     ============================================ */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #2c3e50;
+  --color-text-tertiary: #495057;
+  --color-text-muted: #6c757d;
+  --color-text-placeholder: #999;
+  
+  /* ============================================
+     4. 背景色 (Background Colors)
+     ============================================ */
+  --color-bg-white: #ffffff;
+  --color-bg-light: #f8f9fa;
+  --color-bg-soft: #fafbfc;
+  --color-bg-muted: #e9ecef;
+  --color-bg-alt: #f1f3f5;
+  
+  /* ============================================
+     5. 边框色 (Border Colors)
+     ============================================ */
+  --color-border: #dee2e6;
+  --color-border-light: #e9ecef;
+  --color-border-focus: rgba(13, 110, 253, 0.25);
+  
+  /* ============================================
+     6. 间距系统 (Spacing System) - 基于 4px
+     ============================================ */
+  --space-xs: 0.25rem;   /* 4px */
+  --space-sm: 0.5rem;    /* 8px */
+  --space-md: 1rem;      /* 16px */
+  --space-lg: 1.5rem;    /* 24px */
+  --space-xl: 2rem;      /* 32px */
+  --space-2xl: 2.5rem;   /* 40px */
+  --space-3xl: 3rem;     /* 48px */
+  
+  /* ============================================
+     7. 圆角系统 (Border Radius)
+     ============================================ */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-16: 16px;
+  --radius-20: 20px;
+  --radius-full: 50%;
+  
+  /* ============================================
+     8. 过渡动画 (Transitions)
+     ============================================ */
+  --font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-mono: 'Consolas', 'Monaco', monospace;
+  
+  --font-size-xs: 0.75rem;    /* 12px */
+  --font-size-sm: 0.85rem;    /* ~13.6px */
+  --font-size-base: 0.95rem;  /* ~15.2px */
+  --font-size-md: 1rem;       /* 16px */
+  --font-size-lg: 1.05rem;    /* 16.8px */
+  --font-size-xl: 1.1rem;     /* 17.6px */
+  --font-size-2xl: 1.3rem;    /* 20.8px */
+  --font-size-3xl: 1.75rem;   /* 28px */
+  --font-size-4xl: 2.2rem;    /* 35.2px */
+  
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+  
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.6;
+  --line-height-loose: 1.85;
+  
+  /* ============================================
+     10. 过渡动画 (Transitions)
+     ============================================ */
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ============================================
+     11. Z-index 层级
+     ============================================ */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-modal-backdrop: 400;
+  --z-modal: 500;
+  --z-popover: 600;
+  --z-tooltip: 700;
+}
+
+/* ============================================
+   预定义的实用类 (Utility Classes)
+   快速使用常用样式组合
+   ============================================ */
+
+/* 主题色文本 */
+.text-primary {
+  color: var(--color-primary) !important;
+}
+
+/* 主题色背景 */
+.bg-primary {
+  background-color: var(--color-primary) !important;
+}
+
+/* 主题渐变背景 */
+.bg-primary-gradient {
+  background: var(--color-primary-gradient) !important;
+}
+
+/* 主题色边框 */
+.border-primary {
+  border-color: var(--color-primary) !important;
+}
+
+/* 按钮基础样式 */
+.btn-brand {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-normal);
+}
+
+.btn-brand:hover {
+  transform: translateY(-2px);
+  color: white;
+}
+
+/* 卡片悬停效果 */
+.card-hover-lift {
+  transition: all var(--transition-slow);
+}
+
+.card-hover-lift:hover {
+  transform: translateY(-5px);
+}

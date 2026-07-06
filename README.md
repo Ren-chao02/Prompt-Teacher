@@ -44,31 +44,45 @@
 
 ```
 Prompt Teacher/
-├── admin-panel/          # Vue管理后台
-│   ├── src/
-│   │   ├── api/          # API请求封装
-│   │   ├── components/   # 公共组件
-│   │   ├── router/       # 路由配置
-│   │   ├── store/        # 状态管理
-│   │   └── views/        # 页面视图
-│   └── package.json
-├── core/                 # Django核心应用
-│   ├── templates/        # 前台模板
-│   └── views.py          # 前台视图
-├── practice/             # 练习系统
-│   ├── models.py         # 练习记录、场景、LLM配置模型
-│   ├── services/         # LLM服务
-│   └── api/              # 练习API
-├── learning/             # 学习资源中心
-│   ├── models.py         # 学习材料模型
-│   └── api/              # 学习API
-├── users/                # 用户管理
-│   ├── models.py         # 用户、班级模型
-│   └── api/              # 用户API
-├── analytics/            # 数据分析
-├── notifications/        # 通知系统
-├── prompt_teaching/      # Django项目配置
-└── scripts/              # 辅助脚本
+├── backend/                      # 后端项目根目录
+│   ├── apps/                     # Django 应用
+│   │   ├── users/                #   用户管理
+│   │   ├── practice/             #   练习系统
+│   │   ├── learning/             #   学习资源
+│   │   ├── core/                 #   前台页面
+│   │   ├── analytics/            #   数据分析
+│   │   └── notifications/        #   通知系统
+│   ├── prompt_teaching/          # Django 项目配置
+│   ├── scripts/                  # 辅助脚本
+│   ├── tests/                    # 集成测试
+│   ├── manage.py
+│   ├── requirements.txt
+│   └── pytest.ini
+├── frontend/                     # 前端项目根目录
+│   └── admin-panel/              # Vue 管理后台
+│       ├── src/
+│       │   ├── api/              #   API请求封装
+│       │   ├── components/       #   公共组件
+│       │   ├── router/           #   路由配置
+│       │   ├── stores/           #   Pinia状态管理
+│       │   └── views/            #   页面视图
+│       ├── tests/                #   前端测试
+│       └── package.json
+├── deploy/                       # 部署配置
+│   ├── Dockerfile.backend
+│   ├── Dockerfile.frontend
+│   ├── nginx.conf
+│   └── docker-compose.yml        #（由根目录 docker-compose.yml 引用）
+├── docs/                         # 项目文档
+│   ├── learning-center/          #   VitePress 文档站
+│   ├── deploy/                   #   部署文档
+│   └── superpowers/              #   功能规划与设计
+├── learning-center/              # VitePress 学习中心（独立文档站点）
+├── docker-compose.yml
+├── deploy.sh
+├── .env.example
+├── .gitignore
+└── README.md
 ```
 
 ## 🚀 快速开始

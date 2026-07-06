@@ -21,6 +21,9 @@ node_modules/
 dist/
 .cache/
 
+# VitePress 构建缓存
+.vitepress/cache/
+
 # IDE
 .vscode/
 .idea/

@@ -107,9 +107,9 @@ start() {
     fi
 
     log_success "服务启动成功！"
-    log_info "访问地址: http://localhost"
-    log_info "API 文档: http://localhost/api/docs/"
-    log_info "管理后台: http://localhost/admin/"
+    log_info "访问地址: http://localhost:8081"
+    log_info "API 文档: http://localhost:8081/api/docs/"
+    log_info "管理后台: http://localhost:8081/admin/"
     show_status
 }
 
